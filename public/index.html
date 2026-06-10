@@ -550,6 +550,7 @@ html,body{min-height:100%;background:var(--bg);font-family:'Cairo',sans-serif;co
 }
 .toast.show{transform:translateX(-50%) translateY(0)}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 <body>
 
@@ -566,8 +567,8 @@ html,body{min-height:100%;background:var(--bg);font-family:'Cairo',sans-serif;co
       <div class="logo-neon">2lak</div>
       <div class="h-divider"></div>
       <div>
-        <div class="shop-name">مطعم الأصيل</div>
-        <div class="shop-loc">المعادي · القاهرة</div>
+        <div class="shop-name" id="shopName">جاري التحميل...</div>
+        <div class="shop-loc" id="shopLoc">...</div>
       </div>
     </div>
     <div class="src-pill" id="sourcePill">📱 QR Code</div>
@@ -727,7 +728,7 @@ html,body{min-height:100%;background:var(--bg);font-family:'Cairo',sans-serif;co
         </div>
         <div class="coupon-bottom">
           <div class="coupon-meta">📅 صالح ٧ أيام</div>
-          <div class="coupon-meta">📍 مطعم الأصيل — المعادي</div>
+          <div class="coupon-meta" id="couponMeta">📍 ...</div>
           <div class="coupon-id" id="couponId"></div>
         </div>
       </div>
@@ -806,7 +807,7 @@ html,body{min-height:100%;background:var(--bg);font-family:'Cairo',sans-serif;co
           </div>
           <div class="coupon-bottom">
             <div class="coupon-meta">📅 صالح ١٤ يوم</div>
-            <div class="coupon-meta">📍 مطعم الأصيل — المعادي</div>
+            <div class="coupon-meta" id="couponMeta">📍 ...</div>
             <div class="coupon-id" id="sadCouponId"></div>
           </div>
         </div>
@@ -830,37 +831,211 @@ html,body{min-height:100%;background:var(--bg);font-family:'Cairo',sans-serif;co
 </div>
 <div class="toast" id="toast"></div>
 <script>
-const PRIZES = [
-  { label: 'خصم ١٠٪',       emoji: '🏷️', code: 'ASEEL10',    prob: 20, color: '#2A1E0A' },
-  { label: 'مشروب مجاني',   emoji: '🥤', code: 'ASEEL-DRINK', prob: 10, color: '#0A1F12' },
-  { label: 'حظ أحسن',       emoji: '😅', code: null,           prob: 10, color: '#1A1A1A' },
-  { label: 'خصم ٥٪',        emoji: '🎫', code: 'ASEEL5',      prob: 20, color: '#1A1200' },
-  { label: 'ديسرت مجاني',   emoji: '🍰', code: 'ASEEL-CAKE',  prob: 10, color: '#1F0A1A' },
-  { label: 'وجبة مجانية!',  emoji: '🎁', code: 'ASEEL-FREE1', prob:  5, color: '#1A1200' },
-  { label: 'خصم ١٥٪',       emoji: '💰', code: 'ASEEL15',     prob: 15, color: '#0A1F12' },
-  { label: 'قهوة مجانية',   emoji: '☕', code: 'ASEEL-COFFEE',prob: 10, color: '#1A1000' },
-];
-const COLORS = ['#2A2A1A','#1A2A1A','#2A1A1A','#1A1A2A','#2A1A2A','#2A2010','#182A18','#281A10'];
-const SEG_COLORS = ['#100F00','#000F00','#0F0000','#00000F','#0F0008','#151000','#00100A','#100800'];
+// ── SUPABASE CONFIG ──────────────────────────────────────────
+const SUPABASE_URL  = 'https://ordbzocfzzrymhilvote.supabase.co'
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yZGJ6b2NmenpyeW1oaWx2b3RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTcyMTAsImV4cCI6MjA5NjYzMzIxMH0.q9uEWe5unC3-wKrQFjOgYvQZmEDfKQEzlxlObEGq0EY'
 
-const SOURCE_LABELS = {
-  ig: '📸 Instagram', qr: '📱 QR Code',
-  fb: '👍 Facebook',  gm: '📍 Google Maps', wa: '💬 WhatsApp'
-};
+// Branch ID من الـ URL أو hardcoded للـ demo
+const urlParams = new URLSearchParams(window.location.search)
+const BRANCH_ID = urlParams.get('branch') || null
+const src = urlParams.get('src') || 'qr'
 
-// Detect source from URL param
-const urlParams = new URLSearchParams(window.location.search);
-const src = urlParams.get('src') || 'qr';
-document.getElementById('sourcePill').textContent = SOURCE_LABELS[src] || SOURCE_LABELS.qr;
+// ── SUPABASE CLIENT (CDN) ─────────────────────────────────────
+let supabase = null
+let SESSION_ID = null   // current session ID in DB
+let PRIZES = []         // loaded from DB
+
+async function initSupabase() {
+  // UMD build loaded via <script> tag — available as window.supabase
+  const { createClient } = window.supabase
+  supabase = createClient(SUPABASE_URL, SUPABASE_ANON)
+  await loadBranchData()
+}
+
+async function loadBranchData() {
+  if (!BRANCH_ID) {
+    document.getElementById('shopName').textContent = 'رابط غير صحيح'
+    document.getElementById('shopLoc').textContent  = 'مفيش branch ID في الرابط'
+    console.error('[2lak] No branch ID in URL — add ?branch=YOUR_BRANCH_UUID')
+    initWheel()
+    return
+  }
+  try {
+    // Load branch config
+    const { data: branch, error: bErr } = await supabase
+      .from('branches')
+      .select('*, providers(name, logo_emoji)')
+      .eq('id', BRANCH_ID)
+      .single()
+
+    if (bErr) throw bErr
+
+    // Update header
+    document.getElementById('shopName').textContent = branch.providers.name
+    document.getElementById('shopLoc').textContent = (branch.address || '') + (branch.address ? ' · ' : '') + (branch.city || '')
+    document.getElementById('sourcePill').textContent =
+      (branch.source_messages?.[src]) || SOURCE_LABELS[src] || '📱 QR Code'
+
+    // Store shop name globally
+    SHOP_NAME = branch.providers.name || 'مزود الخدمة'
+    SHOP_LOGO = branch.providers.logo_emoji || '🏪'
+
+    // Update CONFIG from branch
+    CONFIG.otp_enabled        = branch.otp_enabled || false
+    CONFIG.google_review_url  = branch.google_review_url  || '#'
+    CONFIG.facebook_review_url= branch.facebook_review_url|| '#'
+    CONFIG.instagram_url      = branch.instagram_url      || '#'
+
+    // Update coupon meta location
+    const metaText = '📍 ' + branch.providers.name + (branch.name ? ' — ' + branch.name : '')
+    const m1 = document.getElementById('couponMeta')
+    const m2 = document.getElementById('sadCouponMeta')
+    if (m1) m1.textContent = metaText
+    if (m2) m2.textContent = metaText
+
+    // Update REVIEW_LINKS
+    REVIEW_LINKS.google   = branch.google_review_url   || '#'
+    REVIEW_LINKS.facebook = branch.facebook_review_url || '#'
+    REVIEW_LINKS.instagram= branch.instagram_url       || '#'
+
+    // Update complaint chips
+    if (branch.complaint_chips?.length) {
+      const chipsEl = document.getElementById('chips')
+      chipsEl.innerHTML = branch.complaint_chips
+        .map(c => `<button class="chip" onclick="toggleChip(this)">${c}</button>`)
+        .join('')
+    }
+
+    // Load prizes
+    const { data: prizes, error: pErr } = await supabase
+      .from('prizes')
+      .select('*')
+      .eq('branch_id', BRANCH_ID)
+      .eq('is_active', true)
+      .order('sort_order')
+
+    if (pErr) throw pErr
+
+    // Map DB prizes to app format
+    PRIZES = prizes.map(p => ({
+      id:    p.id,
+      label: p.label,
+      emoji: p.emoji,
+      prob:  p.probability,
+      isWin: p.is_win,
+      validDays: p.valid_days,
+      sadBonus:  p.sad_bonus_pct,
+      color: '#111100'
+    }))
+
+    // Re-init wheel with loaded prizes
+    initWheel()
+
+    // Create session in DB
+    await createDBSession()
+
+  } catch (err) {
+    console.warn('[2lak] Supabase load failed — using static fallback:', err.message)
+    // Fallback to static prizes already defined below
+    initWheel()
+  }
+}
+
+let SHOP_NAME = 'مزود الخدمة'
+let SHOP_LOGO = '🏪'
+
+async function createDBSession() {
+  try {
+    const fp = await getDeviceFingerprint()
+    const { data, error } = await supabase
+      .from('sessions')
+      .insert({ branch_id: BRANCH_ID, source: src, device_fp: fp })
+      .select('id')
+      .single()
+    if (!error) SESSION_ID = data.id
+  } catch (e) { console.warn('[2lak] Session create failed:', e.message) }
+}
+
+async function updateSessionRating(rating) {
+  if (!SESSION_ID || !supabase) return
+  await supabase.from('sessions')
+    .update({ rating, rated_at: new Date().toISOString() })
+    .eq('id', SESSION_ID)
+}
+
+async function updateSessionSpin(prizeId, prizeLabel) {
+  if (!SESSION_ID || !supabase) return
+  await supabase.from('sessions')
+    .update({ prize_id: prizeId, spin_result: prizeLabel, spun_at: new Date().toISOString() })
+    .eq('id', SESSION_ID)
+}
+
+async function dbTrackReviewClick(platform) {
+  if (!SESSION_ID || !supabase) return
+  await supabase.from('sessions')
+    .update({ review_clicked: true, review_platform: platform, review_clicked_at: new Date().toISOString() })
+    .eq('id', SESSION_ID)
+}
+
+async function dbRevealQR() {
+  if (!SESSION_ID || !supabase) return
+  await supabase.from('sessions')
+    .update({ qr_revealed: true, qr_revealed_at: new Date().toISOString() })
+    .eq('id', SESSION_ID)
+}
+
+async function dbSubmitComplaint(chips, text) {
+  if (!SESSION_ID || !supabase) return
+  await supabase.from('complaints').insert({
+    session_id: SESSION_ID, branch_id: BRANCH_ID, chips, text
+  })
+  await supabase.from('sessions')
+    .update({ complaint_chips: chips, complaint_text: text, complaint_submitted_at: new Date().toISOString() })
+    .eq('id', SESSION_ID)
+}
+
+// Simple device fingerprint (no library needed)
+async function getDeviceFingerprint() {
+  const raw = [
+    navigator.userAgent,
+    navigator.language,
+    screen.width + 'x' + screen.height,
+    new Date().getTimezoneOffset()
+  ].join('|')
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw))
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('').slice(0,32)
+}
+
+// Static fallback prizes (used if Supabase fails)
+const STATIC_PRIZES = [
+  { label: 'خصم ١٠٪',       emoji: '🏷️', prob: 20, isWin: true  },
+  { label: 'مشروب مجاني',   emoji: '🥤', prob: 10, isWin: true  },
+  { label: 'حظ أحسن',       emoji: '😅', prob: 10, isWin: false },
+  { label: 'خصم ٥٪',        emoji: '🎫', prob: 20, isWin: true  },
+  { label: 'ديسرت مجاني',   emoji: '🍰', prob: 10, isWin: true  },
+  { label: 'وجبة مجانية!',  emoji: '🎁', prob:  5, isWin: true  },
+  { label: 'خصم ١٥٪',       emoji: '💰', prob: 15, isWin: true  },
+  { label: 'قهوة مجانية',   emoji: '☕', prob: 10, isWin: true  },
+]
+if (!PRIZES.length) PRIZES = STATIC_PRIZES
+
+const SEG_COLORS = ['#100F00','#000F00','#0F0000','#00000F','#0F0008','#151000','#00100A','#100800']
+const SOURCE_LABELS = { ig:'📸 Instagram', qr:'📱 QR Code', fb:'👍 Facebook', gm:'📍 Google Maps', wa:'💬 WhatsApp' }
 
 // ── WHEEL STATE ─────────────────────────────────────────────
-const canvas = document.getElementById('wheelCanvas');
-const ctx = canvas.getContext('2d');
-const N = PRIZES.length;
-const ARC = (2 * Math.PI) / N;
-let angle = 0;
-let spinning = false;
-let wonPrize = null;
+const canvas = document.getElementById('wheelCanvas')
+const ctx    = canvas.getContext('2d')
+let angle    = 0
+let spinning = false
+let wonPrize = null
+let N        = 8
+let ARC      = (2 * Math.PI) / N
+
+function initWheel() {
+  N   = PRIZES.length || 8
+  ARC = (2 * Math.PI) / N
+  drawWheel(0)
+}
 
 function drawWheel(rot) {
   ctx.clearRect(0, 0, 300, 300);
@@ -924,7 +1099,7 @@ function drawWheel(rot) {
   ctx.fill();
 }
 
-drawWheel(0);
+// wheel drawn by initWheel() after Supabase loads
 
 // ── PICK WINNER (weighted) ───────────────────────────────────
 function pickWinner() {
@@ -979,9 +1154,11 @@ function doSpin() {
 }
 
 function goToRate() {
-  document.getElementById('prizeEmoji').textContent = wonPrize.emoji;
-  document.getElementById('prizeName').textContent = wonPrize.label;
-  showPage('pageRate');
+  document.getElementById('prizeEmoji').textContent = wonPrize.emoji
+  document.getElementById('prizeName').textContent  = wonPrize.label
+  // Save spin to DB
+  if (wonPrize.id) updateSessionSpin(wonPrize.id, wonPrize.label)
+  showPage('pageRate')
 }
 
 // ── RATING ──────────────────────────────────────────────────
@@ -991,14 +1168,16 @@ const CONFIG = {
 };
 
 function goHappy() {
-  window._isSad = false;
-  if (CONFIG.otp_enabled) { showPage('pageOtp'); }
-  else { showRewardDirect(); }
+  window._isSad = false
+  updateSessionRating('happy')
+  if (CONFIG.otp_enabled) { showPage('pageOtp') }
+  else { showRewardDirect() }
 }
 function goSad() {
-  window._isSad = true;
-  if (CONFIG.otp_enabled) { showPage('pageOtp'); }
-  else { showPage('pageSad'); }
+  window._isSad = true
+  updateSessionRating('sad')
+  if (CONFIG.otp_enabled) { showPage('pageOtp') }
+  else { showPage('pageSad') }
 }
 function showRewardDirect() {
   document.getElementById('rewardPrizeName').textContent = wonPrize.emoji + ' ' + wonPrize.label;
@@ -1084,38 +1263,33 @@ function resendOTP() {
 function toggleChip(el) { el.classList.toggle('active'); }
 
 function submitComplaint() {
-  const chips = [...document.querySelectorAll('.chip.active')].map(c => c.textContent);
-  const text  = document.getElementById('complaintText').value;
+  const chips = [...document.querySelectorAll('.chip.active')].map(c => c.textContent)
+  const text  = document.getElementById('complaintText').value
   if (!chips.length && !text.trim()) {
-    showToast('⚠️ اختار مشكلة أو اكتب تعليق');
-    return;
+    showToast('⚠️ اختار مشكلة أو اكتب تعليق')
+    return
   }
-  // In prod: POST /api/complaint { chips, text, uid, shopId }
-  console.log('[2lak] complaint submitted:', chips, text);
+  // Save to Supabase
+  dbSubmitComplaint(chips, text)
 
-  // Hide form, show QR reward — same page
-  document.getElementById('sadFormSection').style.display  = 'none';
-  const rewardSec = document.getElementById('sadRewardSection');
-  rewardSec.style.display = 'block';
+  document.getElementById('sadFormSection').style.display = 'none'
+  document.getElementById('sadRewardSection').style.display = 'block'
 
-  // Set prize name
-  const prizeName = wonPrize ? '🎁 ' + wonPrize.label + ' + تعويض ٢٠٪' : '🎁 تعويض ٢٠٪';
-  document.getElementById('sadPrizeName').textContent = prizeName;
+  const prizeName = wonPrize ? '🎁 ' + wonPrize.label + ' + تعويض ٢٠٪' : '🎁 تعويض ٢٠٪'
+  document.getElementById('sadPrizeName').textContent = prizeName
 
-  // Generate QR
-  const canvas = document.getElementById('sadQrCanvas');
-  const uid    = Math.random().toString(36).slice(2,10).toUpperCase();
-  const ts     = Date.now().toString(36).toUpperCase();
-  const cid    = '2LAK-SAD-' + uid + '-' + ts;
-  document.getElementById('sadCouponId').textContent = 'ID: ' + cid;
+  const sadCanvas = document.getElementById('sadQrCanvas')
+  const uid = Math.random().toString(36).slice(2,10).toUpperCase()
+  const ts  = Date.now().toString(36).toUpperCase()
+  const cid = '2LAK-SAD-' + uid + '-' + ts
+  document.getElementById('sadCouponId').textContent = 'ID: ' + cid
 
-  const redeemHtml = buildRedeemPage(cid, prizeName, 'مطعم الأصيل');
-  const blob       = new Blob([redeemHtml], { type: 'text/html' });
-  const redeemURL  = URL.createObjectURL(blob);
-  generateQR(canvas, redeemURL);
+  const redeemHtml = buildRedeemPage(cid, prizeName, SHOP_NAME)
+  const blob       = new Blob([redeemHtml], { type: 'text/html' })
+  generateQR(sadCanvas, URL.createObjectURL(blob))
 
-  window.scrollTo(0, 0);
-  showToast('✅ وصلت للإدارة — جايزتك جاهزة 🎁');
+  window.scrollTo(0, 0)
+  showToast('✅ وصلت للإدارة — جايزتك جاهزة 🎁')
 }
 
 // ── REVIEW LINKS ─────────────────────────────────────────────
@@ -1236,15 +1410,15 @@ const REVIEW_LINKS = {
 let qrRevealed = false;
 
 function openReview(platform) {
-  const url = REVIEW_LINKS[platform];
-  trackReviewClick(platform);
-  window.open(url, '_blank');
+  const url = REVIEW_LINKS[platform]
+  dbTrackReviewClick(platform)
+  window.open(url, '_blank')
   if (!qrRevealed) {
-    qrRevealed = true;
-    setTimeout(revealQR, 30000);
+    qrRevealed = true
+    setTimeout(revealQR, 30000)
   }
-  showToast('🔗 الصفحة اتفتحت — اكتب تجربتك 📝');
-  return false;
+  showToast('🔗 الصفحة اتفتحت — اكتب تجربتك 📝')
+  return false
 }
 
 function trackReviewClick(platform) {
@@ -1253,25 +1427,23 @@ function trackReviewClick(platform) {
 }
 
 function revealQR() {
-  const locked  = document.getElementById('qrLockedWrap');
-  const revealW = document.getElementById('qrRevealWrap');
-  const canvas  = document.getElementById('qrCanvas');
-  const idEl    = document.getElementById('couponId');
-  locked.style.display  = 'none';
-  revealW.style.display = 'flex';
-  // Generate unique coupon ID
-  const uid  = Math.random().toString(36).slice(2,10).toUpperCase();
-  const ts   = Date.now().toString(36).toUpperCase();
-  const cid  = '2LAK-' + uid + '-' + ts;
-  if (idEl) { idEl.textContent = 'ID: ' + cid; idEl.style.display='flex'; }
-  // Build redeem URL (in prod: your backend URL)
-  const prize = document.getElementById('rewardPrizeName')?.textContent || 'جايزة';
-  const redeemHtml  = buildRedeemPage(cid, prize, 'مطعم الأصيل');
-  const blob   = new Blob([redeemHtml], { type: 'text/html' });
-  const redeemURL = URL.createObjectURL(blob);
-  // Draw QR pointing to redeem page
-  generateQR(canvas, redeemURL);
-  showToast('🎉 الـ QR ظهر — اطلب من الموظف يعمل Scan!');
+  dbRevealQR()
+  const locked  = document.getElementById('qrLockedWrap')
+  const revealW = document.getElementById('qrRevealWrap')
+  const canvas  = document.getElementById('qrCanvas')
+  const idEl    = document.getElementById('couponId')
+  locked.style.display  = 'none'
+  revealW.style.display = 'flex'
+  const uid  = Math.random().toString(36).slice(2,10).toUpperCase()
+  const ts   = Date.now().toString(36).toUpperCase()
+  const cid  = '2LAK-' + uid + '-' + ts
+  if (idEl) { idEl.textContent = 'ID: ' + cid; idEl.style.display='flex' }
+  const prize = document.getElementById('rewardPrizeName')?.textContent || 'جايزة'
+  const redeemHtml  = buildRedeemPage(cid, prize, SHOP_NAME)
+  const blob   = new Blob([redeemHtml], { type: 'text/html' })
+  const redeemURL = URL.createObjectURL(blob)
+  generateQR(canvas, redeemURL)
+  showToast('🎉 الـ QR ظهر — اطلب من الموظف يعمل Scan!')
 }
 
 function copyCoupon() {
@@ -1279,6 +1451,10 @@ function copyCoupon() {
   navigator.clipboard?.writeText(id).catch(() => {});
   showToast('📋 اتنسخ الـ ID!');
 }
+
+// ── BOOT ─────────────────────────────────────────────────────
+// Init Supabase first — falls back to static if fails
+initSupabase()
 
 // ── NAVIGATION ───────────────────────────────────────────────
 function showPage(id) {
