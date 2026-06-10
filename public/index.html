@@ -550,7 +550,7 @@ html,body{min-height:100%;background:var(--bg);font-family:'Cairo',sans-serif;co
 }
 .toast.show{transform:translateX(-50%) translateY(0)}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/db.js"></script>
 </head>
 <body>
 
@@ -832,7 +832,7 @@ html,body{min-height:100%;background:var(--bg);font-family:'Cairo',sans-serif;co
 <div class="toast" id="toast"></div>
 <script>
 // ── SUPABASE CONFIG ──────────────────────────────────────────
-const SUPABASE_URL  = 'https://ordbzocfzzrymhilvote.supabase.co'
+const SUPABASE_URL  = 'https://ordbzocfzzrymhilvote.db.co'
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yZGJ6b2NmenpyeW1oaWx2b3RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTcyMTAsImV4cCI6MjA5NjYzMzIxMH0.q9uEWe5unC3-wKrQFjOgYvQZmEDfKQEzlxlObEGq0EY'
 
 // Branch ID من الـ URL أو hardcoded للـ demo
@@ -841,14 +841,14 @@ const BRANCH_ID = urlParams.get('branch') || null
 const src = urlParams.get('src') || 'qr'
 
 // ── SUPABASE CLIENT (CDN) ─────────────────────────────────────
-let supabase = null
+let db = null
 let SESSION_ID = null   // current session ID in DB
 let PRIZES = []         // loaded from DB
 
 async function initSupabase() {
   // UMD build loaded via <script> tag — available as window.supabase
   const { createClient } = window.supabase
-  supabase = createClient(SUPABASE_URL, SUPABASE_ANON)
+  db = createClient(SUPABASE_URL, SUPABASE_ANON)
   await loadBranchData()
 }
 
@@ -862,7 +862,7 @@ async function loadBranchData() {
   }
   try {
     // Load branch config
-    const { data: branch, error: bErr } = await supabase
+    const { data: branch, error: bErr } = await db
       .from('branches')
       .select('*, providers(name, logo_emoji)')
       .eq('id', BRANCH_ID)
@@ -907,7 +907,7 @@ async function loadBranchData() {
     }
 
     // Load prizes
-    const { data: prizes, error: pErr } = await supabase
+    const { data: prizes, error: pErr } = await db
       .from('prizes')
       .select('*')
       .eq('branch_id', BRANCH_ID)
@@ -947,7 +947,7 @@ let SHOP_LOGO = '🏪'
 async function createDBSession() {
   try {
     const fp = await getDeviceFingerprint()
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('sessions')
       .insert({ branch_id: BRANCH_ID, source: src, device_fp: fp })
       .select('id')
@@ -957,39 +957,39 @@ async function createDBSession() {
 }
 
 async function updateSessionRating(rating) {
-  if (!SESSION_ID || !supabase) return
-  await supabase.from('sessions')
+  if (!SESSION_ID || !db) return
+  await db.from('sessions')
     .update({ rating, rated_at: new Date().toISOString() })
     .eq('id', SESSION_ID)
 }
 
 async function updateSessionSpin(prizeId, prizeLabel) {
-  if (!SESSION_ID || !supabase) return
-  await supabase.from('sessions')
+  if (!SESSION_ID || !db) return
+  await db.from('sessions')
     .update({ prize_id: prizeId, spin_result: prizeLabel, spun_at: new Date().toISOString() })
     .eq('id', SESSION_ID)
 }
 
 async function dbTrackReviewClick(platform) {
-  if (!SESSION_ID || !supabase) return
-  await supabase.from('sessions')
+  if (!SESSION_ID || !db) return
+  await db.from('sessions')
     .update({ review_clicked: true, review_platform: platform, review_clicked_at: new Date().toISOString() })
     .eq('id', SESSION_ID)
 }
 
 async function dbRevealQR() {
-  if (!SESSION_ID || !supabase) return
-  await supabase.from('sessions')
+  if (!SESSION_ID || !db) return
+  await db.from('sessions')
     .update({ qr_revealed: true, qr_revealed_at: new Date().toISOString() })
     .eq('id', SESSION_ID)
 }
 
 async function dbSubmitComplaint(chips, text) {
-  if (!SESSION_ID || !supabase) return
-  await supabase.from('complaints').insert({
+  if (!SESSION_ID || !db) return
+  await db.from('complaints').insert({
     session_id: SESSION_ID, branch_id: BRANCH_ID, chips, text
   })
-  await supabase.from('sessions')
+  await db.from('sessions')
     .update({ complaint_chips: chips, complaint_text: text, complaint_submitted_at: new Date().toISOString() })
     .eq('id', SESSION_ID)
 }
