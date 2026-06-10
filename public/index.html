@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
+<title>2lak.app</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Rubik:wght@800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:       #050508;
+  --bg2:      #0A0A0F;
+  --bg3:      #111118;
+  --bg4:      #18181F;
+  --gold:     #FFD93D;
+  --gold2:    #FF9F1C;
+  --neon-g:   #39FF14;
+  --neon-b:   #00F5FF;
+  --neon-p:   #FF2D9B;
+  --neon-o:   #FF6B00;
+  --white:    #FFFFFF;
+  --off:      #C8C5BE;
+  --muted:    #555560;
+  --muted2:   #333340;
+  --r:        16px;
+  --r-sm:     10px;
+  --r-pill:   999px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%;background:var(--bg);font-family:'Cairo',sans-serif;color:var(--off);overflow-x:hidden}
+
+/* ── AURA AMBIENT ── */
+.aura{
+  position:fixed;pointer-events:none;z-index:0;border-radius:50%;filter:blur(80px);opacity:0.18;
+}
+.aura-1{width:400px;height:400px;top:-100px;left:-120px;background:radial-gradient(circle,#FFD93D,transparent 70%)}
+.aura-2{width:350px;height:350px;bottom:-80px;right:-100px;background:radial-gradient(circle,#FF2D9B,transparent 70%)}
+.aura-3{width:280px;height:280px;top:40%;left:50%;transform:translate(-50%,-50%);background:radial-gradient(circle,#00F5FF,transparent 70%);opacity:0.08}
+
+.app{max-width:430px;margin:0 auto;min-height:100dvh;position:relative;z-index:1;display:flex;flex-direction:column}
+
+/* ── HEADER ── */
+.header{
+  padding:14px 18px 12px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid rgba(255,255,255,0.05);
+  background:rgba(5,5,8,0.85);backdrop-filter:blur(20px);
+  position:sticky;top:0;z-index:50;
+}
+.h-left{display:flex;align-items:center;gap:10px}
+.logo-neon{
+  font-family:'Rubik',sans-serif;font-size:20px;font-weight:900;
+  color:var(--gold);letter-spacing:-1px;
+  text-shadow:0 0 12px rgba(255,217,61,.6),0 0 30px rgba(255,217,61,.3);
+}
+.h-divider{width:1px;height:22px;background:var(--muted2)}
+.shop-name{font-size:13px;font-weight:700;color:var(--white)}
+.shop-loc{font-size:10px;color:var(--muted);margin-top:1px}
+.src-pill{
+  padding:5px 12px;border-radius:var(--r-pill);
+  border:1px solid rgba(0,245,255,0.25);
+  background:rgba(0,245,255,0.06);
+  font-size:10px;font-weight:700;color:var(--neon-b);
+  display:flex;align-items:center;gap:4px;
+  text-shadow:0 0 8px rgba(0,245,255,.4);
+}
+
+/* ── PAGES ── */
+.page{display:none;flex-direction:column;flex:1;animation:pg-in .4s cubic-bezier(.22,1,.36,1) both}
+.page.active{display:flex}
+@keyframes pg-in{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+/* ══════════════════
+   SPIN PAGE
+══════════════════ */
+.spin-page{padding:22px 20px 32px;display:flex;flex-direction:column;align-items:center}
+
+.spin-tag{
+  display:inline-flex;align-items:center;gap:7px;
+  border:1px solid rgba(57,255,20,0.3);
+  background:rgba(57,255,20,0.06);
+  border-radius:var(--r-pill);padding:5px 14px;
+  font-size:11px;font-weight:700;color:var(--neon-g);
+  margin-bottom:18px;
+  text-shadow:0 0 8px rgba(57,255,20,.5);
+  box-shadow:0 0 16px rgba(57,255,20,.08) inset;
+}
+.tag-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--neon-g);
+  box-shadow:0 0 6px var(--neon-g);
+  animation:blink 1.4s ease-in-out infinite;
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+.spin-hed{text-align:center;margin-bottom:24px}
+.spin-hed h1{
+  font-size:30px;font-weight:900;line-height:1.15;color:var(--white);
+  font-family:'Rubik',sans-serif;
+}
+.spin-hed h1 span{
+  color:var(--gold);
+  text-shadow:0 0 20px rgba(255,217,61,.5),0 0 40px rgba(255,217,61,.2);
+}
+.spin-hed p{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.6}
+
+/* WHEEL */
+.wheel-wrap{position:relative;width:290px;height:290px;margin:0 auto 26px;flex-shrink:0}
+
+/* floating aura under wheel */
+.wheel-aura{
+  position:absolute;inset:-30px;border-radius:50%;
+  background:conic-gradient(from 0deg,
+    rgba(255,217,61,.15) 0%,
+    rgba(255,45,155,.1) 25%,
+    rgba(0,245,255,.1) 50%,
+    rgba(57,255,20,.1) 75%,
+    rgba(255,217,61,.15) 100%);
+  filter:blur(24px);
+  animation:aura-rot 8s linear infinite;
+}
+@keyframes aura-rot{to{transform:rotate(360deg)}}
+
+.wheel-ring-outer{
+  position:absolute;inset:0;border-radius:50%;
+  border:1px solid rgba(255,217,61,.2);
+  box-shadow:0 0 20px rgba(255,217,61,.12),inset 0 0 20px rgba(255,217,61,.05);
+}
+#wheelCanvas{
+  width:290px;height:290px;border-radius:50%;
+  display:block;cursor:pointer;position:relative;z-index:2;
+}
+.wheel-ptr{
+  position:absolute;top:-18px;left:50%;transform:translateX(-50%);
+  z-index:10;
+  /* neon outline triangle */
+  width:22px;height:22px;
+}
+.wheel-ptr svg{filter:drop-shadow(0 0 6px rgba(255,217,61,.8)) drop-shadow(0 0 14px rgba(255,217,61,.4))}
+
+.wheel-hub{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:50px;height:50px;border-radius:50%;
+  background:var(--bg);
+  border:2px solid var(--gold);
+  box-shadow:0 0 12px rgba(255,217,61,.4),inset 0 0 10px rgba(255,217,61,.08);
+  display:flex;align-items:center;justify-content:center;
+  z-index:10;
+  font-family:'Rubik',sans-serif;font-size:10px;font-weight:900;
+  color:var(--gold);letter-spacing:-0.5px;
+  text-shadow:0 0 8px rgba(255,217,61,.6);
+}
+
+/* SPIN BUTTON — neon outlined */
+.spin-btn{
+  width:100%;padding:16px;border-radius:var(--r);
+  background:transparent;
+  border:1.5px solid var(--gold);
+  color:var(--gold);
+  font-family:'Rubik',sans-serif;font-size:17px;font-weight:900;
+  cursor:pointer;letter-spacing:-.3px;
+  box-shadow:0 0 20px rgba(255,217,61,.2), inset 0 0 20px rgba(255,217,61,.04);
+  text-shadow:0 0 10px rgba(255,217,61,.5);
+  transition:all .2s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.spin-btn:hover{
+  background:rgba(255,217,61,.07);
+  box-shadow:0 0 32px rgba(255,217,61,.35),inset 0 0 20px rgba(255,217,61,.08);
+}
+.spin-btn:active{transform:scale(.97)}
+.spin-btn:disabled{opacity:.3;cursor:not-allowed;transform:none}
+
+.spin-note{
+  margin-top:14px;font-size:11px;color:var(--muted);
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.spin-note svg{opacity:.5}
+
+/* ══════════════════
+   RATE PAGE
+══════════════════ */
+.rate-page{padding:24px 20px 32px;display:flex;flex-direction:column;gap:22px}
+
+.prize-card{
+  border-radius:var(--r);overflow:hidden;
+  border:1px solid rgba(255,217,61,.2);
+  background:var(--bg2);
+  box-shadow:0 0 40px rgba(255,217,61,.06);
+  position:relative;
+}
+.prize-card-inner{
+  padding:24px 20px;text-align:center;position:relative;
+}
+/* aura top glow */
+.prize-card-inner::before{
+  content:'';position:absolute;top:-20px;left:50%;transform:translateX(-50%);
+  width:160px;height:80px;
+  background:radial-gradient(ellipse,rgba(255,217,61,.2) 0%,transparent 70%);
+  pointer-events:none;
+}
+/* neon prize emoji via SVG-style outline */
+.prize-emoji-wrap{
+  width:72px;height:72px;border-radius:50%;
+  border:2px solid rgba(255,217,61,.4);
+  box-shadow:0 0 16px rgba(255,217,61,.15),inset 0 0 16px rgba(255,217,61,.05);
+  display:flex;align-items:center;justify-content:center;
+  font-size:34px;margin:0 auto 14px;
+  background:rgba(255,217,61,.04);
+}
+.prize-name{font-size:22px;font-weight:900;color:var(--gold);margin-bottom:10px;font-family:'Rubik',sans-serif;text-shadow:0 0 16px rgba(255,217,61,.4)}
+.prize-lock{
+  display:inline-flex;align-items:center;gap:6px;
+  border:1px solid rgba(255,217,61,.2);border-radius:var(--r-pill);
+  padding:5px 14px;font-size:11px;font-weight:700;color:rgba(255,217,61,.6);
+}
+
+.rate-label{font-size:17px;font-weight:900;color:var(--white);text-align:center;font-family:'Rubik',sans-serif}
+.rate-sub{font-size:12px;color:var(--muted);text-align:center;margin-top:4px}
+
+.rate-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* NEON OUTLINED BUTTONS */
+.rbtn{
+  padding:22px 10px;border-radius:var(--r);
+  border:1.5px solid;cursor:pointer;background:transparent;
+  font-family:'Cairo',sans-serif;
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  transition:all .2s;position:relative;overflow:hidden;
+}
+/* neon icon circle */
+.rbtn-icon{
+  width:52px;height:52px;border-radius:50%;
+  border:2px solid;
+  display:flex;align-items:center;justify-content:center;
+}
+.rbtn-icon svg{width:26px;height:26px}
+.rbtn .lbl{font-size:14px;font-weight:800}
+
+.rbtn.happy{border-color:rgba(57,255,20,.35)}
+.rbtn.happy .rbtn-icon{border-color:var(--neon-g);box-shadow:0 0 14px rgba(57,255,20,.2),inset 0 0 10px rgba(57,255,20,.05)}
+.rbtn.happy .rbtn-icon svg{stroke:var(--neon-g)}
+.rbtn.happy .lbl{color:var(--neon-g);text-shadow:0 0 10px rgba(57,255,20,.4)}
+.rbtn.happy:hover{background:rgba(57,255,20,.05);box-shadow:0 0 24px rgba(57,255,20,.1)}
+
+.rbtn.sad{border-color:rgba(255,45,155,.35)}
+.rbtn.sad .rbtn-icon{border-color:var(--neon-p);box-shadow:0 0 14px rgba(255,45,155,.2),inset 0 0 10px rgba(255,45,155,.05)}
+.rbtn.sad .rbtn-icon svg{stroke:var(--neon-p)}
+.rbtn.sad .lbl{color:var(--neon-p);text-shadow:0 0 10px rgba(255,45,155,.4)}
+.rbtn.sad:hover{background:rgba(255,45,155,.05);box-shadow:0 0 24px rgba(255,45,155,.1)}
+
+.rbtn:active{transform:scale(.96)}
+
+/* ══════════════════
+   OTP PAGE
+══════════════════ */
+.otp-page{padding:32px 24px;display:flex;flex-direction:column;align-items:center;gap:26px;flex:1;justify-content:center}
+.otp-icon-wrap{
+  width:72px;height:72px;border-radius:50%;
+  border:2px solid rgba(0,245,255,.4);
+  box-shadow:0 0 20px rgba(0,245,255,.15),inset 0 0 16px rgba(0,245,255,.06);
+  background:rgba(0,245,255,.04);
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 16px;
+}
+.otp-icon-wrap svg{width:32px;height:32px;stroke:var(--neon-b);stroke-width:1.5;fill:none}
+.otp-title{font-size:22px;font-weight:900;color:var(--white);font-family:'Rubik',sans-serif;text-align:center;margin-bottom:6px}
+.otp-sub{font-size:13px;color:var(--muted);line-height:1.7;text-align:center}
+.otp-form{width:100%;display:flex;flex-direction:column;gap:12px}
+.phone-wrap{
+  display:flex;align-items:stretch;
+  background:var(--bg3);border:1.5px solid var(--muted2);
+  border-radius:var(--r-sm);overflow:hidden;transition:border-color .2s;
+}
+.phone-wrap:focus-within{border-color:rgba(0,245,255,.4);box-shadow:0 0 16px rgba(0,245,255,.08)}
+.flag-code{
+  padding:14px 12px;font-size:13px;font-weight:700;color:var(--muted);
+  border-left:1px solid var(--muted2);background:var(--bg4);
+  display:flex;align-items:center;gap:6px;white-space:nowrap;
+}
+.phone-in{
+  flex:1;padding:14px;background:transparent;border:none;outline:none;
+  font-family:'Cairo',sans-serif;font-size:15px;font-weight:700;color:var(--white);
+  direction:ltr;text-align:left;
+}
+.phone-in::placeholder{color:var(--muted);font-weight:400}
+
+.neon-btn{
+  width:100%;padding:15px;border-radius:var(--r-sm);
+  background:transparent;border:1.5px solid;
+  font-family:'Rubik',sans-serif;font-size:15px;font-weight:900;
+  cursor:pointer;transition:all .2s;
+}
+.neon-btn.cyan{
+  border-color:rgba(0,245,255,.4);color:var(--neon-b);
+  box-shadow:0 0 16px rgba(0,245,255,.1);
+  text-shadow:0 0 10px rgba(0,245,255,.4);
+}
+.neon-btn.cyan:hover{background:rgba(0,245,255,.06);box-shadow:0 0 24px rgba(0,245,255,.2)}
+.neon-btn.cyan:disabled{opacity:.3;cursor:not-allowed}
+.neon-btn.gold{
+  border-color:rgba(255,217,61,.4);color:var(--gold);
+  box-shadow:0 0 16px rgba(255,217,61,.1);
+  text-shadow:0 0 10px rgba(255,217,61,.4);
+}
+.neon-btn.gold:hover{background:rgba(255,217,61,.06);box-shadow:0 0 24px rgba(255,217,61,.2)}
+.neon-btn.gold:disabled{opacity:.3;cursor:not-allowed}
+.neon-btn:active{transform:scale(.98)}
+
+.test-banner{
+  display:none;align-items:center;justify-content:space-between;gap:12px;
+  background:rgba(57,255,20,.06);border:1px solid rgba(57,255,20,.25);
+  border-radius:var(--r-sm);padding:12px 16px;
+}
+.test-badge{
+  background:transparent;border:1px solid var(--neon-g);
+  color:var(--neon-g);font-size:9px;font-weight:800;
+  padding:2px 8px;border-radius:var(--r-pill);
+  text-shadow:0 0 6px var(--neon-g);
+}
+.test-code{
+  font-size:26px;font-weight:900;color:var(--neon-g);
+  letter-spacing:6px;direction:ltr;font-family:monospace;
+  text-shadow:0 0 12px rgba(57,255,20,.6);
+}
+
+.otp-boxes-section{width:100%;display:flex;flex-direction:column;gap:14px;align-items:center}
+.otp-sent-note{font-size:12px;color:var(--muted);text-align:center}
+.otp-sent-note span{color:var(--neon-b);font-weight:700;text-shadow:0 0 8px rgba(0,245,255,.4)}
+.otp-boxes{display:flex;gap:8px;direction:ltr}
+.obox{
+  width:44px;height:52px;border-radius:var(--r-sm);
+  background:var(--bg3);border:1.5px solid var(--muted2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;font-weight:900;color:var(--white);
+  transition:all .2s;
+}
+.obox.active{border-color:var(--neon-b);box-shadow:0 0 12px rgba(0,245,255,.2);background:rgba(0,245,255,.04)}
+.obox.filled{border-color:var(--gold);background:rgba(255,217,61,.06);color:var(--gold);text-shadow:0 0 8px rgba(255,217,61,.4)}
+
+.resend-txt{font-size:11px;color:var(--muted);text-align:center;cursor:pointer}
+.resend-txt span{color:var(--neon-b)}
+.priv-note{
+  display:flex;align-items:flex-start;gap:8px;
+  background:var(--bg3);border-radius:var(--r-sm);border:1px solid var(--muted2);
+  padding:10px 12px;font-size:11px;color:var(--muted);line-height:1.6;
+}
+
+/* ══════════════════
+   REWARD PAGE
+══════════════════ */
+.reward-page{padding:24px 20px 32px;display:flex;flex-direction:column;gap:18px;align-items:center}
+
+.confetti-top{text-align:center}
+.congrats-emoji-wrap{
+  width:80px;height:80px;border-radius:50%;
+  border:2px solid var(--neon-g);
+  box-shadow:0 0 20px rgba(57,255,20,.25),inset 0 0 16px rgba(57,255,20,.06);
+  display:flex;align-items:center;justify-content:center;
+  font-size:36px;margin:0 auto 12px;
+  animation:pop-in .5s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes pop-in{from{transform:scale(0) rotate(-15deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
+.congrats-title{font-size:26px;font-weight:900;color:var(--white);font-family:'Rubik',sans-serif;margin-bottom:4px;text-shadow:0 0 20px rgba(57,255,20,.15)}
+.congrats-sub{font-size:13px;color:var(--muted)}
+
+.coupon-card{
+  width:100%;border-radius:var(--r);overflow:hidden;
+  border:1px solid rgba(255,255,255,.07);
+  background:var(--bg2);
+}
+.coupon-top{
+  padding:20px;text-align:center;
+  border-bottom:1px solid rgba(255,255,255,.05);
+  position:relative;overflow:hidden;
+}
+.coupon-top::before{
+  content:'';position:absolute;top:-30px;left:50%;transform:translateX(-50%);
+  width:200px;height:80px;
+  background:radial-gradient(ellipse,rgba(57,255,20,.12) 0%,transparent 70%);
+  pointer-events:none;
+}
+.coupon-prize-name{font-size:18px;font-weight:900;color:var(--neon-g);margin-bottom:14px;font-family:'Rubik',sans-serif;text-shadow:0 0 12px rgba(57,255,20,.4)}
+
+.qr-locked-wrap{
+  min-height:120px;border-radius:var(--r-sm);
+  border:1.5px dashed rgba(255,217,61,.2);
+  display:flex;align-items:center;justify-content:center;margin:0 0 4px;
+}
+.qr-lock-msg{display:flex;flex-direction:column;align-items:center;gap:10px;padding:16px}
+.qr-lock-icon-wrap{
+  width:44px;height:44px;border-radius:50%;
+  border:1.5px solid rgba(255,217,61,.3);
+  box-shadow:0 0 12px rgba(255,217,61,.1);
+  display:flex;align-items:center;justify-content:center;
+}
+.qr-lock-icon-wrap svg{width:20px;height:20px;stroke:var(--gold);stroke-width:1.8;fill:none}
+.qr-lock-text{font-size:12px;color:rgba(255,217,61,.6);text-align:center;line-height:1.6;font-weight:700}
+
+.qr-reveal-wrap{
+  display:none;flex-direction:column;align-items:center;gap:10px;
+  padding:8px 0 4px;animation:pg-in .4s ease;
+}
+#qrCanvas{border-radius:10px;background:#fff;padding:8px;box-shadow:0 0 0 2px rgba(57,255,20,.3),0 0 20px rgba(57,255,20,.15)}
+.qr-hint{
+  font-size:11px;font-weight:700;color:var(--neon-g);
+  display:flex;align-items:center;gap:5px;
+  text-shadow:0 0 8px rgba(57,255,20,.4);
+}
+
+.coupon-bottom{background:var(--bg);padding:12px 18px}
+.coupon-meta{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px;margin-bottom:3px}
+.coupon-id{font-size:10px;color:var(--muted2);direction:ltr;font-family:monospace;margin-top:2px}
+
+.review-section{width:100%}
+.review-label{font-size:13px;font-weight:700;color:var(--off);margin-bottom:10px;text-align:center}
+.review-btns{display:flex;flex-direction:column;gap:8px}
+.rev-btn{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 16px;
+  background:var(--bg3);
+  border:1px solid var(--muted2);
+  border-radius:var(--r-sm);
+  cursor:pointer;text-decoration:none;color:var(--off);
+  transition:all .15s;
+}
+.rev-btn:hover{background:var(--bg4);border-color:rgba(255,255,255,.12)}
+.rev-btn:active{transform:scale(.98)}
+.rev-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rev-text{flex:1;font-size:13px;font-weight:700}
+.rev-arrow{font-size:11px;color:var(--muted);transform:scaleX(-1)}
+
+/* ══════════════════
+   SAD PAGE
+══════════════════ */
+.sad-page{padding:24px 20px 32px;display:flex;flex-direction:column;gap:18px}
+
+.sad-header{text-align:center}
+.sad-icon-wrap{
+  width:72px;height:72px;border-radius:50%;
+  border:2px solid rgba(255,45,155,.4);
+  box-shadow:0 0 20px rgba(255,45,155,.15),inset 0 0 16px rgba(255,45,155,.06);
+  display:flex;align-items:center;justify-content:center;
+  font-size:32px;margin:0 auto 14px;
+}
+.sad-title-txt{font-size:20px;font-weight:900;color:var(--white);font-family:'Rubik',sans-serif;margin-bottom:6px}
+.sad-sub-txt{font-size:12px;color:var(--muted);line-height:1.7}
+.priv-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--bg3);border:1px solid var(--muted2);
+  border-radius:var(--r-pill);padding:6px 14px;
+  font-size:11px;color:var(--muted);margin:0 auto;width:fit-content;
+}
+.complaint-form{display:flex;flex-direction:column;gap:16px}
+.form-lbl{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;display:block}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{
+  padding:7px 14px;border-radius:var(--r-pill);
+  border:1px solid var(--muted2);background:var(--bg3);
+  color:var(--muted);font-size:12px;font-weight:700;
+  cursor:pointer;transition:all .15s;font-family:'Cairo',sans-serif;
+}
+.chip.active{
+  background:rgba(255,45,155,.08);
+  border-color:rgba(255,45,155,.4);
+  color:var(--neon-p);
+  text-shadow:0 0 8px rgba(255,45,155,.4);
+  box-shadow:0 0 10px rgba(255,45,155,.08);
+}
+.complaint-ta{
+  width:100%;min-height:88px;
+  background:var(--bg3);border:1.5px solid var(--muted2);
+  border-radius:var(--r-sm);padding:12px 14px;
+  font-family:'Cairo',sans-serif;font-size:13px;color:var(--off);
+  resize:none;outline:none;line-height:1.6;transition:border-color .2s;
+}
+.complaint-ta:focus{border-color:rgba(255,45,155,.3);box-shadow:0 0 12px rgba(255,45,155,.06)}
+.complaint-ta::placeholder{color:var(--muted)}
+.submit-complaint{
+  width:100%;padding:15px;border-radius:var(--r-sm);
+  background:transparent;
+  border:1.5px solid rgba(255,45,155,.4);
+  color:var(--neon-p);
+  font-family:'Rubik',sans-serif;font-size:15px;font-weight:900;
+  cursor:pointer;transition:all .2s;
+  text-shadow:0 0 10px rgba(255,45,155,.4);
+  box-shadow:0 0 16px rgba(255,45,155,.08);
+}
+.submit-complaint:hover{background:rgba(255,45,155,.06);box-shadow:0 0 24px rgba(255,45,155,.15)}
+.submit-complaint:active{transform:scale(.98)}
+
+/* sad reward */
+.sad-reward-section{animation:pg-in .4s ease}
+.sad-thanx-icon{
+  width:72px;height:72px;border-radius:50%;
+  border:2px solid rgba(255,159,28,.4);
+  box-shadow:0 0 20px rgba(255,159,28,.15);
+  display:flex;align-items:center;justify-content:center;
+  font-size:32px;margin:0 auto 14px;
+  animation:pop-in .5s cubic-bezier(.34,1.56,.64,1);
+}
+.sad-thanx-title{font-size:20px;font-weight:900;color:var(--gold2);font-family:'Rubik',sans-serif;margin-bottom:4px;text-align:center;text-shadow:0 0 14px rgba(255,159,28,.3)}
+.sad-thanx-sub{font-size:12px;color:var(--muted);line-height:1.6;text-align:center}
+
+/* ══════════════════
+   LOCKED
+══════════════════ */
+.locked-page{
+  flex:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:40px 24px;gap:14px;text-align:center;
+}
+.locked-icon-wrap{
+  width:80px;height:80px;border-radius:50%;
+  border:2px solid var(--muted2);
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:4px;
+}
+.locked-icon-wrap svg{width:36px;height:36px;stroke:var(--muted);stroke-width:1.5;fill:none}
+.locked-title{font-size:22px;font-weight:900;color:var(--white);font-family:'Rubik',sans-serif}
+.locked-sub{font-size:13px;color:var(--muted);line-height:1.7;max-width:260px}
+
+/* ══════════════════
+   POWERED
+══════════════════ */
+.powered-bar{
+  padding:14px 0 22px;text-align:center;
+  font-size:10px;color:rgba(255,255,255,.15);
+  display:flex;align-items:center;justify-content:center;gap:5px;
+}
+.powered-bar strong{
+  font-family:'Rubik',sans-serif;color:var(--gold);opacity:.4;
+  text-shadow:0 0 8px rgba(255,217,61,.3);
+}
+
+/* ══════════════════
+   TOAST
+══════════════════ */
+.toast{
+  position:fixed;bottom:24px;left:50%;
+  transform:translateX(-50%) translateY(80px);
+  background:var(--bg4);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:var(--r-pill);padding:10px 20px;
+  font-size:12px;font-weight:700;color:var(--off);
+  transition:transform .35s cubic-bezier(.34,1.56,.64,1);
+  z-index:200;white-space:nowrap;
+  display:flex;align-items:center;gap:7px;
+  box-shadow:0 8px 32px rgba(0,0,0,.6);
+}
+.toast.show{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- AMBIENT AURA -->
+<div class="aura aura-1"></div>
+<div class="aura aura-2"></div>
+<div class="aura aura-3"></div>
+
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="h-left">
+      <div class="logo-neon">2lak</div>
+      <div class="h-divider"></div>
+      <div>
+        <div class="shop-name">مطعم الأصيل</div>
+        <div class="shop-loc">المعادي · القاهرة</div>
+      </div>
+    </div>
+    <div class="src-pill" id="sourcePill">📱 QR Code</div>
+  </div>
+
+  <!-- PAGE 1: SPIN -->
+  <div class="page active" id="pageSpin">
+    <div class="spin-page">
+      <div class="spin-tag">
+        <span class="tag-dot"></span>
+        فرصتك دلوقتي
+      </div>
+      <div class="spin-hed">
+        <h1>دوّر واعرف<br><span>جايزتك</span></h1>
+        <p>قيّم بعدها وهتاخد الـ QR فوراً</p>
+      </div>
+      <div class="wheel-wrap">
+        <div class="wheel-aura"></div>
+        <div class="wheel-ring-outer"></div>
+        <canvas id="wheelCanvas" width="290" height="290"></canvas>
+        <div class="wheel-ptr">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <path d="M11 2 L19 18 L11 14 L3 18 Z" fill="#FFD93D" stroke="none"/>
+          </svg>
+        </div>
+        <div class="wheel-hub">2lak</div>
+      </div>
+      <button class="spin-btn" id="spinBtn" onclick="doSpin()">
+        &#9679; دوّر دلوقتي
+      </button>
+      <div class="spin-note">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        فرصة واحدة لكل شخص
+      </div>
+    </div>
+    <div class="powered-bar">مدعوم بـ <strong>2lak.app</strong></div>
+  </div>
+
+  <!-- PAGE 2: RATE -->
+  <div class="page" id="pageRate">
+    <div class="rate-page">
+      <div class="prize-card">
+        <div class="prize-card-inner">
+          <div class="prize-emoji-wrap" id="prizeEmojiWrap">
+            <span id="prizeEmoji">🎁</span>
+          </div>
+          <div class="prize-name" id="prizeName">وجبة مجانية!</div>
+          <div class="prize-lock">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            قيّم الأول عشان تاخد الـ QR
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="rate-label">إيه رأيك في تجربتك؟</div>
+        <div class="rate-sub">إجابتك بتساعدنا نتحسن</div>
+      </div>
+      <div class="rate-btns">
+        <button class="rbtn happy" onclick="goHappy()">
+          <div class="rbtn-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+              <line x1="9" y1="9" x2="9.01" y2="9" stroke-linecap="round" stroke-width="2.5"/>
+              <line x1="15" y1="9" x2="15.01" y2="9" stroke-linecap="round" stroke-width="2.5"/>
+            </svg>
+          </div>
+          <span class="lbl">ممتاز</span>
+        </button>
+        <button class="rbtn sad" onclick="goSad()">
+          <div class="rbtn-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M16 16s-1.5-2-4-2-4 2-4 2"/>
+              <line x1="9" y1="9" x2="9.01" y2="9" stroke-linecap="round" stroke-width="2.5"/>
+              <line x1="15" y1="9" x2="15.01" y2="9" stroke-linecap="round" stroke-width="2.5"/>
+            </svg>
+          </div>
+          <span class="lbl">مش كويس</span>
+        </button>
+      </div>
+    </div>
+    <div class="powered-bar">مدعوم بـ <strong>2lak.app</strong></div>
+  </div>
+
+  <!-- PAGE 3: OTP -->
+  <div class="page" id="pageOtp">
+    <div class="otp-page">
+      <div>
+        <div class="otp-icon-wrap">
+          <svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18" stroke-linecap="round" stroke-width="2.5"/></svg>
+        </div>
+        <div class="otp-title">تأكيد رقمك</div>
+        <div class="otp-sub">هنبعتلك كود على موبايلك<br>عشان تاخد جايزتك</div>
+      </div>
+      <div class="otp-form" id="phoneStep">
+        <div class="phone-wrap">
+          <div class="flag-code">🇪🇬 +20</div>
+          <input class="phone-in" id="phoneInput" type="tel" placeholder="010 0000 0000" maxlength="11" oninput="handlePhone(this)">
+        </div>
+        <button class="neon-btn cyan" id="sendOtpBtn" onclick="sendOTP()" disabled>إرسال كود التحقق</button>
+        <div class="priv-note">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          رقمك محمي — بيُستخدم بس لمنع الاستخدام المتكرر
+        </div>
+      </div>
+      <div class="otp-boxes-section" id="otpStep" style="display:none;">
+        <div class="otp-sent-note">وصلك كود على <span id="otpPhone">010****</span></div>
+        <div class="test-banner" id="testBanner">
+          <div><div class="test-badge">TEST MODE</div><div style="font-size:10px;color:var(--neon-g);margin-top:3px;">الكود الثابت</div></div>
+          <div class="test-code">123456</div>
+        </div>
+        <div class="otp-boxes" id="otpBoxes">
+          <div class="obox active" data-i="0"></div>
+          <div class="obox" data-i="1"></div>
+          <div class="obox" data-i="2"></div>
+          <div class="obox" data-i="3"></div>
+          <div class="obox" data-i="4"></div>
+          <div class="obox" data-i="5"></div>
+        </div>
+        <input type="tel" id="otpHidden" maxlength="6" inputmode="numeric"
+          style="position:absolute;opacity:0;width:1px;height:1px;pointer-events:none;"
+          oninput="handleOTP(this)">
+        <button class="neon-btn gold" id="verifyBtn" onclick="verifyOTP()" disabled>تأكيد وجيب جايزتي</button>
+        <div class="resend-txt">لو ماجاش — <span onclick="resendOTP()">إعادة الإرسال</span></div>
+      </div>
+    </div>
+    <div class="powered-bar">مدعوم بـ <strong>2lak.app</strong></div>
+  </div>
+
+  <!-- PAGE 4: HAPPY REWARD -->
+  <div class="page" id="pageReward">
+    <div class="reward-page">
+      <div class="confetti-top">
+        <div class="congrats-emoji-wrap">🎉</div>
+        <div class="congrats-title">مبروك!</div>
+        <div class="congrats-sub">اطلب من الموظف يعمل Scan للـ QR</div>
+      </div>
+      <div class="coupon-card">
+        <div class="coupon-top">
+          <div class="coupon-prize-name" id="rewardPrizeName">وجبة مجانية 🎁</div>
+          <div class="qr-locked-wrap" id="qrLockedWrap">
+            <div class="qr-lock-msg">
+              <div class="qr-lock-icon-wrap">
+                <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+              </div>
+              <span class="qr-lock-text">اكتب review أو comment<br>عشان الـ QR يظهر</span>
+            </div>
+          </div>
+          <div class="qr-reveal-wrap" id="qrRevealWrap">
+            <canvas id="qrCanvas" width="180" height="180"></canvas>
+            <div class="qr-hint">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/></svg>
+              اطلب من الموظف يعمل Scan
+            </div>
+          </div>
+        </div>
+        <div class="coupon-bottom">
+          <div class="coupon-meta">📅 صالح ٧ أيام</div>
+          <div class="coupon-meta">📍 مطعم الأصيل — المعادي</div>
+          <div class="coupon-id" id="couponId"></div>
+        </div>
+      </div>
+      <div class="review-section">
+        <div class="review-label">اكتب review أو comment — وهيظهرلك الـ QR 👇</div>
+        <div class="review-btns">
+          <a class="rev-btn" href="#" onclick="openReview('google')">
+            <div class="rev-icon" style="background:#1a0a0a;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+            </div>
+            <span class="rev-text">Google Maps</span><span class="rev-arrow">←</span>
+          </a>
+          <a class="rev-btn" href="#" onclick="openReview('facebook')">
+            <div class="rev-icon" style="background:#0a0e1a;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            </div>
+            <span class="rev-text">Facebook</span><span class="rev-arrow">←</span>
+          </a>
+          <a class="rev-btn" href="#" onclick="openReview('instagram')">
+            <div class="rev-icon" style="background:#1a0a12;">
+              <svg width="18" height="18" viewBox="0 0 24 24"><defs><linearGradient id="ig" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#f09433"/><stop offset="50%" style="stop-color:#dc2743"/><stop offset="100%" style="stop-color:#bc1888"/></linearGradient></defs><path fill="url(#ig)" d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4z"/></svg>
+            </div>
+            <span class="rev-text">Instagram</span><span class="rev-arrow">←</span>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="powered-bar">مدعوم بـ <strong>2lak.app</strong></div>
+  </div>
+
+  <!-- PAGE 5: SAD -->
+  <div class="page" id="pageSad">
+    <div class="sad-page">
+      <div id="sadFormSection">
+        <div class="sad-header">
+          <div class="sad-icon-wrap">😞</div>
+          <div class="sad-title-txt">آسفين على تجربتك</div>
+          <div class="sad-sub-txt">شكواك سرية — بتوصل للمدير مباشرة<br>مش هتظهر على Google أو أي مكان</div>
+        </div>
+        <div class="priv-badge">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          شكوى خاصة — للإدارة فقط
+        </div>
+        <div class="complaint-form">
+          <div>
+            <label class="form-lbl">المشكلة كانت في؟</label>
+            <div class="chips" id="chips">
+              <button class="chip" onclick="toggleChip(this)">الأكل</button>
+              <button class="chip" onclick="toggleChip(this)">الخدمة</button>
+              <button class="chip" onclick="toggleChip(this)">الانتظار</button>
+              <button class="chip" onclick="toggleChip(this)">النظافة</button>
+              <button class="chip" onclick="toggleChip(this)">الأسعار</button>
+              <button class="chip" onclick="toggleChip(this)">تاني</button>
+            </div>
+          </div>
+          <div>
+            <label class="form-lbl">تفاصيل (اختياري)</label>
+            <textarea class="complaint-ta" id="complaintText" placeholder="اكتب هنا..."></textarea>
+          </div>
+          <button class="submit-complaint" onclick="submitComplaint()">إرسال للإدارة</button>
+        </div>
+      </div>
+      <div id="sadRewardSection" style="display:none;" class="sad-reward-section">
+        <div class="sad-header" style="margin-bottom:16px;">
+          <div class="sad-thanx-icon">🙏</div>
+          <div class="sad-thanx-title">وصلت للمدير — شكراً</div>
+          <div class="sad-thanx-sub">هنتواصل معاك قريباً — وده تعويضك</div>
+        </div>
+        <div class="coupon-card">
+          <div class="coupon-top" style="border-top:2px solid rgba(255,159,28,.3);box-shadow:0 0 30px rgba(255,159,28,.05) inset;">
+            <div class="coupon-prize-name" id="sadPrizeName" style="color:var(--gold2);text-shadow:0 0 12px rgba(255,159,28,.4);">🎁 جايزتك + تعويض ٢٠٪</div>
+            <div class="qr-reveal-wrap" id="sadQrRevealWrap" style="display:flex;">
+              <canvas id="sadQrCanvas" width="180" height="180" style="box-shadow:0 0 0 2px rgba(255,159,28,.3),0 0 20px rgba(255,159,28,.15)"></canvas>
+              <div class="qr-hint" style="color:var(--gold2);text-shadow:0 0 8px rgba(255,159,28,.4);">📲 اطلب من الموظف يعمل Scan</div>
+            </div>
+          </div>
+          <div class="coupon-bottom">
+            <div class="coupon-meta">📅 صالح ١٤ يوم</div>
+            <div class="coupon-meta">📍 مطعم الأصيل — المعادي</div>
+            <div class="coupon-id" id="sadCouponId"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="powered-bar">مدعوم بـ <strong>2lak.app</strong></div>
+  </div>
+
+  <!-- PAGE 6: LOCKED -->
+  <div class="page" id="pageLocked">
+    <div class="locked-page">
+      <div class="locked-icon-wrap">
+        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+      </div>
+      <div class="locked-title">سبق وشاركت</div>
+      <div class="locked-sub">إنت قيّمت المطعم ده قبل كده<br>كل شخص ليه فرصة واحدة للعدل</div>
+    </div>
+    <div class="powered-bar">مدعوم بـ <strong>2lak.app</strong></div>
+  </div>
+
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const PRIZES = [
+  { label: 'خصم ١٠٪',       emoji: '🏷️', code: 'ASEEL10',    prob: 20, color: '#2A1E0A' },
+  { label: 'مشروب مجاني',   emoji: '🥤', code: 'ASEEL-DRINK', prob: 10, color: '#0A1F12' },
+  { label: 'حظ أحسن',       emoji: '😅', code: null,           prob: 10, color: '#1A1A1A' },
+  { label: 'خصم ٥٪',        emoji: '🎫', code: 'ASEEL5',      prob: 20, color: '#1A1200' },
+  { label: 'ديسرت مجاني',   emoji: '🍰', code: 'ASEEL-CAKE',  prob: 10, color: '#1F0A1A' },
+  { label: 'وجبة مجانية!',  emoji: '🎁', code: 'ASEEL-FREE1', prob:  5, color: '#1A1200' },
+  { label: 'خصم ١٥٪',       emoji: '💰', code: 'ASEEL15',     prob: 15, color: '#0A1F12' },
+  { label: 'قهوة مجانية',   emoji: '☕', code: 'ASEEL-COFFEE',prob: 10, color: '#1A1000' },
+];
+const COLORS = ['#2A2A1A','#1A2A1A','#2A1A1A','#1A1A2A','#2A1A2A','#2A2010','#182A18','#281A10'];
+const SEG_COLORS = ['#100F00','#000F00','#0F0000','#00000F','#0F0008','#151000','#00100A','#100800'];
+
+const SOURCE_LABELS = {
+  ig: '📸 Instagram', qr: '📱 QR Code',
+  fb: '👍 Facebook',  gm: '📍 Google Maps', wa: '💬 WhatsApp'
+};
+
+// Detect source from URL param
+const urlParams = new URLSearchParams(window.location.search);
+const src = urlParams.get('src') || 'qr';
+document.getElementById('sourcePill').textContent = SOURCE_LABELS[src] || SOURCE_LABELS.qr;
+
+// ── WHEEL STATE ─────────────────────────────────────────────
+const canvas = document.getElementById('wheelCanvas');
+const ctx = canvas.getContext('2d');
+const N = PRIZES.length;
+const ARC = (2 * Math.PI) / N;
+let angle = 0;
+let spinning = false;
+let wonPrize = null;
+
+function drawWheel(rot) {
+  ctx.clearRect(0, 0, 300, 300);
+  const cx = 150, cy = 150, r = 144;
+  for (let i = 0; i < N; i++) {
+    const start = rot + i * ARC - Math.PI / 2;
+    const end   = start + ARC;
+    const mid   = start + ARC / 2;
+    // segment
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, start, end);
+    ctx.closePath();
+    ctx.fillStyle = SEG_COLORS[i % SEG_COLORS.length];
+    ctx.fill();
+    ctx.strokeStyle = '#0C0C0C';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    // tick marks
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(mid);
+    ctx.beginPath();
+    ctx.moveTo(r - 6, 0); ctx.lineTo(r, 0);
+    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.restore();
+    // emoji
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(mid);
+    ctx.font = '18px serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(PRIZES[i].emoji, r * 0.72, 0);
+    ctx.restore();
+    // label
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(mid);
+    ctx.font = 'bold 10px Cairo, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#FFFFFF';
+    ctx.shadowColor = 'rgba(0,0,0,0.8)';
+    ctx.shadowBlur = 3;
+    ctx.fillText(PRIZES[i].label, r * 0.42, 0);
+    ctx.restore();
+  }
+  // outer ring
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+  ctx.strokeStyle = 'rgba(245,200,66,0.5)';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+  // inner separator
+  ctx.beginPath();
+  ctx.arc(cx, cy, 30, 0, 2 * Math.PI);
+  ctx.fillStyle = '#0C0C0C';
+  ctx.fill();
+}
+
+drawWheel(0);
+
+// ── PICK WINNER (weighted) ───────────────────────────────────
+function pickWinner() {
+  const total = PRIZES.reduce((s, p) => s + p.prob, 0);
+  let r = Math.random() * total;
+  for (let i = 0; i < PRIZES.length; i++) {
+    r -= PRIZES[i].prob;
+    if (r <= 0) return i;
+  }
+  return PRIZES.length - 1;
+}
+
+// ── SPIN ────────────────────────────────────────────────────
+function doSpin() {
+  if (spinning) return;
+  spinning = true;
+  const btn = document.getElementById('spinBtn');
+  btn.disabled = true;
+  btn.textContent = '🎰 بيدور...';
+
+  const winnerIdx = pickWinner();
+  wonPrize = PRIZES[winnerIdx];
+
+  // target angle: winner segment center facing top pointer
+  const segCenter = (winnerIdx + 0.5) * ARC;
+  const extraSpins = (5 + Math.floor(Math.random() * 3)) * 2 * Math.PI;
+  const targetAngle = extraSpins + (2 * Math.PI - segCenter);
+
+  const start = performance.now();
+  const duration = 4500;
+  const startAngle = angle;
+
+  function easeOut(t) {
+    return 1 - Math.pow(1 - t, 4);
+  }
+
+  function frame(now) {
+    const elapsed = now - start;
+    const t = Math.min(elapsed / duration, 1);
+    angle = startAngle + targetAngle * easeOut(t);
+    drawWheel(angle);
+    if (t < 1) {
+      requestAnimationFrame(frame);
+    } else {
+      spinning = false;
+      angle = angle % (2 * Math.PI);
+      showToast('🎉 يلا شوف جايزتك!');
+      setTimeout(() => goToRate(), 800);
+    }
+  }
+  requestAnimationFrame(frame);
+}
+
+function goToRate() {
+  document.getElementById('prizeEmoji').textContent = wonPrize.emoji;
+  document.getElementById('prizeName').textContent = wonPrize.label;
+  showPage('pageRate');
+}
+
+// ── RATING ──────────────────────────────────────────────────
+// ── ADMIN CONFIG (will be set from Admin Panel) ──────────────
+const CONFIG = {
+  otp_enabled: false,   // Admin can toggle ON/OFF
+};
+
+function goHappy() {
+  window._isSad = false;
+  if (CONFIG.otp_enabled) { showPage('pageOtp'); }
+  else { showRewardDirect(); }
+}
+function goSad() {
+  window._isSad = true;
+  if (CONFIG.otp_enabled) { showPage('pageOtp'); }
+  else { showPage('pageSad'); }
+}
+function showRewardDirect() {
+  document.getElementById('rewardPrizeName').textContent = wonPrize.emoji + ' ' + wonPrize.label;
+  showPage('pageReward');
+}
+
+// ── OTP ─────────────────────────────────────────────────────
+let otpCode = '';
+let enteredOtp = '';
+
+function handlePhone(el) {
+  const val = el.value.replace(/\D/g, '');
+  el.value = val;
+  document.getElementById('sendOtpBtn').disabled = val.length < 10;
+}
+
+function sendOTP() {
+  const phone = document.getElementById('phoneInput').value;
+  if (phone.length < 10) return;
+  // ─ TEST MODE: fixed code ─────────────────────
+  otpCode = '123456';
+  // ─────────────────────────────────────────────
+  enteredOtp = '';
+  const masked = phone.slice(0,3) + '****' + phone.slice(-2);
+  document.getElementById('otpPhone').textContent = masked;
+  document.getElementById('phoneStep').style.display = 'none';
+  const otpStepEl = document.getElementById('otpStep');
+  otpStepEl.style.display = 'flex';
+  document.getElementById('testBanner').style.display = 'flex';
+  setTimeout(() => {
+    document.getElementById('otpHidden').focus();
+  }, 100);
+}
+
+function handleOTP(el) {
+  enteredOtp = el.value.replace(/\D/g, '').slice(0,6);
+  const boxes = document.querySelectorAll('.otp-box');
+  boxes.forEach((b, i) => {
+    b.classList.remove('active','filled');
+    if (i < enteredOtp.length) {
+      b.textContent = enteredOtp[i];
+      b.classList.add('filled');
+    } else {
+      b.textContent = '';
+      if (i === enteredOtp.length) b.classList.add('active');
+    }
+  });
+  document.getElementById('verifyBtn').disabled = enteredOtp.length < 6;
+}
+
+// tap on boxes → focus hidden
+document.getElementById('otpBoxes').addEventListener('click', () => {
+  document.getElementById('otpHidden').focus();
+});
+
+function verifyOTP() {
+  if (enteredOtp === otpCode) {
+    showToast('✅ تم التحقق بنجاح!');
+    setTimeout(() => {
+      if (window._isSad) { showPage('pageSad'); }
+      else { showRewardDirect(); }
+    }, 600);
+  } else {
+    showToast('❌ الكود غلط — جرب تاني');
+    enteredOtp = '';
+    document.getElementById('otpHidden').value = '';
+    document.querySelectorAll('.otp-box').forEach((b,i) => {
+      b.textContent = '';
+      b.classList.remove('filled');
+      if (i === 0) b.classList.add('active');
+      else b.classList.remove('active');
+    });
+    document.getElementById('verifyBtn').disabled = true;
+  }
+}
+
+function resendOTP() {
+  otpCode = '123456';
+  showToast('📱 كود التجربة دايماً: 123456');
+}
+
+// ── COMPLAINT ────────────────────────────────────────────────
+function toggleChip(el) { el.classList.toggle('active'); }
+
+function submitComplaint() {
+  const chips = [...document.querySelectorAll('.chip.active')].map(c => c.textContent);
+  const text  = document.getElementById('complaintText').value;
+  if (!chips.length && !text.trim()) {
+    showToast('⚠️ اختار مشكلة أو اكتب تعليق');
+    return;
+  }
+  // In prod: POST /api/complaint { chips, text, uid, shopId }
+  console.log('[2lak] complaint submitted:', chips, text);
+
+  // Hide form, show QR reward — same page
+  document.getElementById('sadFormSection').style.display  = 'none';
+  const rewardSec = document.getElementById('sadRewardSection');
+  rewardSec.style.display = 'block';
+
+  // Set prize name
+  const prizeName = wonPrize ? '🎁 ' + wonPrize.label + ' + تعويض ٢٠٪' : '🎁 تعويض ٢٠٪';
+  document.getElementById('sadPrizeName').textContent = prizeName;
+
+  // Generate QR
+  const canvas = document.getElementById('sadQrCanvas');
+  const uid    = Math.random().toString(36).slice(2,10).toUpperCase();
+  const ts     = Date.now().toString(36).toUpperCase();
+  const cid    = '2LAK-SAD-' + uid + '-' + ts;
+  document.getElementById('sadCouponId').textContent = 'ID: ' + cid;
+
+  const redeemHtml = buildRedeemPage(cid, prizeName, 'مطعم الأصيل');
+  const blob       = new Blob([redeemHtml], { type: 'text/html' });
+  const redeemURL  = URL.createObjectURL(blob);
+  generateQR(canvas, redeemURL);
+
+  window.scrollTo(0, 0);
+  showToast('✅ وصلت للإدارة — جايزتك جاهزة 🎁');
+}
+
+// ── REVIEW LINKS ─────────────────────────────────────────────
+// ── QR GENERATION (no library needed — pure canvas) ──────────
+function generateQR(canvas, text) {
+  // Minimal QR-like visual using deterministic pattern from text hash
+  // In production: use a real QR lib like qrcode.js
+  const ctx = canvas.getContext('2d');
+  const size = canvas.width;
+  const modules = 21;
+  const cell = Math.floor(size / modules);
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, size, size);
+  // Hash the text to get deterministic bits
+  let hash = 0;
+  for (let i = 0; i < text.length; i++) {
+    hash = ((hash << 5) - hash) + text.charCodeAt(i);
+    hash |= 0;
+  }
+  const bits = [];
+  let h = Math.abs(hash);
+  for (let i = 0; i < modules * modules; i++) {
+    h = (h * 1664525 + 1013904223) & 0xffffffff;
+    bits.push(Math.abs(h) % 4 !== 0);
+  }
+  ctx.fillStyle = '#111';
+  for (let r = 0; r < modules; r++) {
+    for (let c = 0; c < modules; c++) {
+      // finder pattern corners always solid
+      const inFinder = (r < 8 && c < 8) || (r < 8 && c >= modules-8) || (r >= modules-8 && c < 8);
+      if (inFinder || bits[r * modules + c]) {
+        ctx.fillRect(c * cell + 4, r * cell + 4, cell - 1, cell - 1);
+      }
+    }
+  }
+  // finder squares (3 corners)
+  const drawFinder = (x, y) => {
+    ctx.fillStyle = '#111';
+    ctx.fillRect(x, y, 7*cell, 7*cell);
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(x+cell, y+cell, 5*cell, 5*cell);
+    ctx.fillStyle = '#111';
+    ctx.fillRect(x+2*cell, y+2*cell, 3*cell, 3*cell);
+  };
+  drawFinder(4, 4);
+  drawFinder(size - 7*cell - 4, 4);
+  drawFinder(4, size - 7*cell - 4);
+  // center logo
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(size/2-18, size/2-10, 36, 20);
+  ctx.fillStyle = '#111';
+  ctx.font = 'bold 9px monospace';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('2lak', size/2, size/2);
+}
+
+// ── REDEEM PAGE (staff view) ──────────────────────────────────
+function buildRedeemPage(couponId, prizeName, shopName) {
+  return `<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>2lak — Redeem</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0C0C0C;color:#F0EDE8;font-family:'Cairo',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+.card{background:#161616;border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:28px 24px;max-width:360px;width:100%;text-align:center;}
+.status-dot{width:14px;height:14px;border-radius:50%;background:#22C55E;margin:0 auto 16px;box-shadow:0 0 10px #22C55E;}
+.title{font-size:13px;color:#888;margin-bottom:4px;}
+.prize{font-size:22px;font-weight:900;color:#F5C842;margin-bottom:6px;}
+.shop{font-size:13px;color:#888;margin-bottom:20px;}
+.id-box{background:#0C0C0C;border-radius:8px;padding:10px;font-family:monospace;font-size:12px;color:#555;margin-bottom:24px;word-break:break-all;}
+.btn-redeem{width:100%;padding:16px;background:#22C55E;border:none;border-radius:12px;font-family:'Cairo',sans-serif;font-size:16px;font-weight:800;color:#0A1800;cursor:pointer;margin-bottom:10px;}
+.btn-cancel{width:100%;padding:14px;background:transparent;border:1px solid rgba(239,68,68,0.4);border-radius:12px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:600;color:#EF4444;cursor:pointer;}
+.btn-redeem:active,.btn-cancel:active{transform:scale(0.98);}
+.done-msg{display:none;font-size:18px;font-weight:800;color:#22C55E;padding:20px 0;}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="status-dot" id="dot"></div>
+  <div class="title">جايزة صالحة للاستبدال</div>
+  <div class="prize" id="prizeEl">${prizeName}</div>
+  <div class="shop">${shopName}</div>
+  <div class="id-box">${couponId}</div>
+  <div id="actions">
+    <button class="btn-redeem" onclick="redeem()">✅ تم الاستبدال</button>
+    <button class="btn-cancel" onclick="cancelRedeem()">❌ رفض الاستبدال الآن</button>
+  </div>
+  <div class="done-msg" id="doneMsg"></div>
+</div>
+<script>
+function redeem(){
+  document.getElementById('actions').style.display='none';
+  const d=document.getElementById('doneMsg');
+  d.style.display='block'; d.textContent='✅ تم الاستبدال بنجاح';
+  document.getElementById('dot').style.background='#F5C842';
+  document.getElementById('dot').style.boxShadow='0 0 10px #F5C842';
+  // In prod: POST /api/redeem { couponId }
+}
+function cancelRedeem(){
+  document.getElementById('actions').style.display='none';
+  const d=document.getElementById('doneMsg');
+  d.style.display='block'; d.textContent='⏳ تم التأجيل — الكود لسه صالح';
+  document.getElementById('dot').style.background='#888';
+}
+<\/script>
+</body></html>`;
+}
+
+// ── TRACKED REDIRECT ────────────────────────────────────────
+const REVIEW_LINKS = {
+  google:   'https://g.page/r/YOUR_GOOGLE_ID/review',
+  facebook: 'https://facebook.com/YOUR_PAGE/reviews',
+  instagram:'https://instagram.com/YOUR_HANDLE'
+};
+let qrRevealed = false;
+
+function openReview(platform) {
+  const url = REVIEW_LINKS[platform];
+  trackReviewClick(platform);
+  window.open(url, '_blank');
+  if (!qrRevealed) {
+    qrRevealed = true;
+    setTimeout(revealQR, 30000);
+  }
+  showToast('🔗 الصفحة اتفتحت — اكتب تجربتك 📝');
+  return false;
+}
+
+function trackReviewClick(platform) {
+  console.log('[2lak] review click tracked:', platform);
+  // In production: fetch('/api/track', { method:'POST', body: JSON.stringify({ platform, uid: sessionUid }) })
+}
+
+function revealQR() {
+  const locked  = document.getElementById('qrLockedWrap');
+  const revealW = document.getElementById('qrRevealWrap');
+  const canvas  = document.getElementById('qrCanvas');
+  const idEl    = document.getElementById('couponId');
+  locked.style.display  = 'none';
+  revealW.style.display = 'flex';
+  // Generate unique coupon ID
+  const uid  = Math.random().toString(36).slice(2,10).toUpperCase();
+  const ts   = Date.now().toString(36).toUpperCase();
+  const cid  = '2LAK-' + uid + '-' + ts;
+  if (idEl) { idEl.textContent = 'ID: ' + cid; idEl.style.display='flex'; }
+  // Build redeem URL (in prod: your backend URL)
+  const prize = document.getElementById('rewardPrizeName')?.textContent || 'جايزة';
+  const redeemHtml  = buildRedeemPage(cid, prize, 'مطعم الأصيل');
+  const blob   = new Blob([redeemHtml], { type: 'text/html' });
+  const redeemURL = URL.createObjectURL(blob);
+  // Draw QR pointing to redeem page
+  generateQR(canvas, redeemURL);
+  showToast('🎉 الـ QR ظهر — اطلب من الموظف يعمل Scan!');
+}
+
+function copyCoupon() {
+  const id = document.getElementById('couponId')?.textContent || '';
+  navigator.clipboard?.writeText(id).catch(() => {});
+  showToast('📋 اتنسخ الـ ID!');
+}
+
+// ── NAVIGATION ───────────────────────────────────────────────
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const pg = document.getElementById(id);
+  pg.classList.add('active');
+  pg.scrollTop = 0;
+  window.scrollTo(0, 0);
+}
+
+// ── TOAST ────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+</script>
+</body>
+</html>
