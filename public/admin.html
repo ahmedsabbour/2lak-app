@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>2lak Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+:root{
+  --bg:#0A0A0F;--bg2:#111118;--bg3:#18181F;--bg4:#222230;
+  --gold:#FFD93D;--gold2:#FF9F1C;
+  --neon:#39FF14;--cyan:#00F5FF;--pink:#FF2D9B;
+  --white:#FFFFFF;--off:#C8C5BE;--muted:#666680;--muted2:#2A2A38;
+  --red:#FF3B3B;--green:#39FF14;
+  --r:12px;--r-sm:8px;--r-pill:999px;
+  --sidebar:220px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);font-family:'Cairo',sans-serif;color:var(--off);overflow:hidden}
+
+/* ── LAYOUT ── */
+.layout{display:flex;height:100vh}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:var(--sidebar);flex-shrink:0;
+  background:var(--bg2);
+  border-left:1px solid rgba(255,255,255,.06);
+  display:flex;flex-direction:column;
+  overflow-y:auto;
+}
+.sidebar-logo{
+  padding:20px 16px 16px;
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.logo-txt{
+  font-size:22px;font-weight:900;color:var(--gold);
+  text-shadow:0 0 16px rgba(255,217,61,.4);
+  font-family:'Cairo',sans-serif;
+}
+.logo-sub{font-size:10px;color:var(--muted);margin-top:2px}
+
+.nav{flex:1;padding:12px 8px}
+.nav-section{font-size:9px;font-weight:700;color:var(--muted);padding:12px 10px 6px;letter-spacing:1px;text-transform:uppercase}
+.nav-item{
+  display:flex;align-items:center;gap:9px;
+  padding:9px 12px;border-radius:var(--r-sm);
+  cursor:pointer;font-size:13px;font-weight:500;color:var(--muted);
+  transition:all .15s;margin-bottom:2px;
+}
+.nav-item:hover{background:var(--bg3);color:var(--off)}
+.nav-item.active{background:rgba(255,217,61,.1);color:var(--gold);border:1px solid rgba(255,217,61,.15)}
+.nav-item i{font-size:16px;flex-shrink:0}
+.nav-badge{margin-right:auto;background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:var(--r-pill)}
+
+.sidebar-footer{
+  padding:14px 16px;border-top:1px solid rgba(255,255,255,.06);
+  font-size:11px;color:var(--muted);
+}
+.online-dot{width:6px;height:6px;border-radius:50%;background:var(--neon);display:inline-block;margin-left:5px;box-shadow:0 0 6px var(--neon)}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+.topbar{
+  padding:14px 24px;
+  background:var(--bg2);
+  border-bottom:1px solid rgba(255,255,255,.06);
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;
+}
+.page-title{font-size:16px;font-weight:700;color:var(--white)}
+.page-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.topbar-actions{display:flex;align-items:center;gap:10px}
+
+.btn{
+  padding:8px 16px;border-radius:var(--r-sm);
+  font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;
+  cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px;
+  border:1px solid;
+}
+.btn-ghost{background:transparent;border-color:var(--muted2);color:var(--muted)}
+.btn-ghost:hover{border-color:rgba(255,255,255,.2);color:var(--off)}
+.btn-gold{background:var(--gold);border-color:var(--gold);color:#0A0A0F}
+.btn-gold:hover{box-shadow:0 0 16px rgba(255,217,61,.3)}
+.btn-red{background:transparent;border-color:rgba(255,59,59,.3);color:var(--red)}
+.btn-red:hover{background:rgba(255,59,59,.08)}
+.btn-sm{padding:5px 10px;font-size:11px}
+.btn:active{transform:scale(.97)}
+
+.content{flex:1;overflow-y:auto;padding:24px}
+
+/* ── PANELS ── */
+.panel{display:none}
+.panel.active{display:block}
+
+/* ── STATS ROW ── */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.stat-card{
+  background:var(--bg3);border:1px solid rgba(255,255,255,.06);
+  border-radius:var(--r);padding:16px;
+}
+.stat-label{font-size:11px;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.stat-val{font-size:24px;font-weight:700;color:var(--white)}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:4px}
+.stat-icon{font-size:18px}
+
+/* ── TABLES ── */
+.table-card{
+  background:var(--bg2);border:1px solid rgba(255,255,255,.06);
+  border-radius:var(--r);overflow:hidden;margin-bottom:20px;
+}
+.table-header{
+  padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.06);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.table-title{font-size:14px;font-weight:700;color:var(--white)}
+.table-sub{font-size:11px;color:var(--muted);margin-top:2px}
+table{width:100%;border-collapse:collapse}
+th{
+  padding:10px 18px;text-align:right;font-size:11px;font-weight:700;
+  color:var(--muted);border-bottom:1px solid rgba(255,255,255,.06);
+  background:var(--bg3);text-transform:uppercase;letter-spacing:.5px;
+}
+td{
+  padding:12px 18px;font-size:13px;color:var(--off);
+  border-bottom:1px solid rgba(255,255,255,.04);
+}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+
+.badge{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:3px 9px;border-radius:var(--r-pill);
+  font-size:10px;font-weight:700;
+}
+.badge-green{background:rgba(57,255,20,.1);color:var(--neon);border:1px solid rgba(57,255,20,.2)}
+.badge-red{background:rgba(255,59,59,.1);color:var(--red);border:1px solid rgba(255,59,59,.2)}
+.badge-gold{background:rgba(255,217,61,.1);color:var(--gold);border:1px solid rgba(255,217,61,.2)}
+.badge-gray{background:var(--muted2);color:var(--muted);border:1px solid rgba(255,255,255,.06)}
+.badge-cyan{background:rgba(0,245,255,.1);color:var(--cyan);border:1px solid rgba(0,245,255,.2)}
+
+/* ── FORMS ── */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.form-input,.form-select,.form-textarea{
+  background:var(--bg3);border:1px solid rgba(255,255,255,.08);
+  border-radius:var(--r-sm);padding:10px 12px;
+  font-family:'Cairo',sans-serif;font-size:13px;color:var(--white);
+  outline:none;transition:border-color .2s;width:100%;
+}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:rgba(255,217,61,.4)}
+.form-input::placeholder{color:var(--muted)}
+.form-select{cursor:pointer}
+.form-select option{background:var(--bg3)}
+.form-textarea{resize:vertical;min-height:80px}
+
+/* ── MODAL ── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.7);
+  display:none;align-items:center;justify-content:center;
+  z-index:100;backdrop-filter:blur(4px);
+}
+.modal-overlay.open{display:flex}
+.modal{
+  background:var(--bg2);border:1px solid rgba(255,255,255,.1);
+  border-radius:16px;padding:24px;width:560px;max-width:95vw;
+  max-height:85vh;overflow-y:auto;
+}
+.modal-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:20px;
+}
+.modal-title{font-size:16px;font-weight:700;color:var(--white)}
+.modal-close{
+  background:var(--muted2);border:none;border-radius:50%;
+  width:28px;height:28px;cursor:pointer;color:var(--muted);
+  display:flex;align-items:center;justify-content:center;font-size:14px;
+}
+.modal-close:hover{color:var(--white)}
+.modal-footer{margin-top:20px;display:flex;gap:10px;justify-content:flex-end;border-top:1px solid rgba(255,255,255,.06);padding-top:16px}
+
+/* ── PRIZE BUILDER ── */
+.prize-row{
+  display:grid;grid-template-columns:40px 1fr 80px 80px 80px 40px;
+  gap:8px;align-items:center;
+  padding:10px 12px;
+  background:var(--bg3);border:1px solid rgba(255,255,255,.06);
+  border-radius:var(--r-sm);margin-bottom:6px;
+}
+.prize-num{font-size:11px;color:var(--muted);text-align:center}
+.prize-emoji-btn{
+  width:36px;height:36px;border-radius:var(--r-sm);
+  background:var(--bg4);border:1px solid rgba(255,255,255,.08);
+  cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;
+}
+.prize-pct-input{
+  background:var(--bg4);border:1px solid rgba(255,255,255,.08);
+  border-radius:var(--r-sm);padding:6px 8px;
+  font-family:'Cairo',sans-serif;font-size:13px;color:var(--white);
+  outline:none;width:100%;text-align:center;
+}
+.prize-pct-input:focus{border-color:rgba(255,217,61,.4)}
+.pct-total{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 12px;
+  border-radius:var(--r-sm);font-size:12px;font-weight:700;
+  margin-top:8px;
+}
+.pct-ok{background:rgba(57,255,20,.08);border:1px solid rgba(57,255,20,.2);color:var(--neon)}
+.pct-err{background:rgba(255,59,59,.08);border:1px solid rgba(255,59,59,.2);color:var(--red)}
+
+/* ── TOGGLE ── */
+.toggle-wrap{display:flex;align-items:center;gap:10px}
+.toggle{
+  width:40px;height:22px;border-radius:var(--r-pill);
+  background:var(--muted2);border:none;cursor:pointer;
+  position:relative;transition:background .2s;flex-shrink:0;
+}
+.toggle.on{background:rgba(57,255,20,.4);border:1px solid var(--neon)}
+.toggle::after{
+  content:'';position:absolute;top:3px;right:3px;
+  width:16px;height:16px;border-radius:50%;
+  background:var(--muted);transition:all .2s;
+}
+.toggle.on::after{right:calc(100% - 19px);background:var(--neon);box-shadow:0 0 6px var(--neon)}
+.toggle-lbl{font-size:12px;color:var(--off)}
+
+/* ── COMPLAINT CARD ── */
+.complaint-card{
+  background:var(--bg3);border:1px solid rgba(255,59,59,.15);
+  border-radius:var(--r);padding:14px 16px;margin-bottom:10px;
+}
+.complaint-meta{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.complaint-text{font-size:13px;color:var(--off);line-height:1.6;margin-bottom:10px}
+.complaint-chips-row{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+.complaint-chip{
+  padding:3px 10px;border-radius:var(--r-pill);font-size:11px;
+  background:rgba(255,59,59,.1);color:var(--red);border:1px solid rgba(255,59,59,.2);
+}
+.complaint-actions{display:flex;gap:8px}
+
+/* ── EMOJI PICKER ── */
+.emoji-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;max-height:200px;overflow-y:auto;margin-top:12px}
+.emoji-btn{
+  width:34px;height:34px;border-radius:var(--r-sm);font-size:18px;
+  cursor:pointer;background:var(--bg3);border:1px solid transparent;
+  display:flex;align-items:center;justify-content:center;transition:all .1s;
+}
+.emoji-btn:hover{background:var(--bg4);border-color:rgba(255,217,61,.3)}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--muted2);border-radius:4px}
+
+/* ── CHART BAR ── */
+.mini-bar{display:flex;align-items:flex-end;gap:3px;height:50px}
+.bar{flex:1;border-radius:3px 3px 0 0;background:rgba(255,217,61,.3);min-height:4px;transition:height .3s}
+.bar.today{background:var(--gold)}
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-txt">2lak</div>
+      <div class="logo-sub">Admin Panel</div>
+    </div>
+    <nav class="nav">
+      <div class="nav-section">الرئيسية</div>
+      <div class="nav-item active" onclick="showPanel('dashboard',this)">
+        <i class="ti ti-layout-dashboard" aria-hidden="true"></i> لوحة التحكم
+      </div>
+      <div class="nav-section">المتاجر</div>
+      <div class="nav-item" onclick="showPanel('providers',this)">
+        <i class="ti ti-building-store" aria-hidden="true"></i> مزودو الخدمة
+      </div>
+      <div class="nav-item" onclick="showPanel('branches',this)">
+        <i class="ti ti-git-branch" aria-hidden="true"></i> الفروع
+      </div>
+      <div class="nav-item" onclick="showPanel('prizes',this)">
+        <i class="ti ti-gift" aria-hidden="true"></i> الجوايز
+      </div>
+      <div class="nav-section">التقارير</div>
+      <div class="nav-item" onclick="showPanel('sessions',this)">
+        <i class="ti ti-chart-bar" aria-hidden="true"></i> الجلسات
+      </div>
+      <div class="nav-item" onclick="showPanel('complaints',this)">
+        <i class="ti ti-message-exclamation" aria-hidden="true"></i> الشكاوى
+        <span class="nav-badge" id="complaintsCount">0</span>
+      </div>
+      <div class="nav-item" onclick="showPanel('coupons',this)">
+        <i class="ti ti-ticket" aria-hidden="true"></i> الكوبونات
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <span class="online-dot"></span> متصل بـ Supabase
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div>
+        <div class="page-title" id="pageTitle">لوحة التحكم</div>
+        <div class="page-sub" id="pageSub">نظرة عامة على النظام</div>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost btn-sm" onclick="loadAll()">
+          <i class="ti ti-refresh" aria-hidden="true"></i> تحديث
+        </button>
+        <button class="btn btn-gold btn-sm" onclick="openModal('modalProvider')">
+          <i class="ti ti-plus" aria-hidden="true"></i> متجر جديد
+        </button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ══ DASHBOARD ══ -->
+      <div class="panel active" id="panelDashboard">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label"><i class="ti ti-building-store stat-icon" aria-hidden="true"></i> مزودو الخدمة</div>
+            <div class="stat-val" id="statProviders">—</div>
+            <div class="stat-sub">إجمالي المتاجر</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label"><i class="ti ti-git-branch stat-icon" aria-hidden="true"></i> الفروع النشطة</div>
+            <div class="stat-val" id="statBranches">—</div>
+            <div class="stat-sub">مشتركة حالياً</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label"><i class="ti ti-chart-bar stat-icon" aria-hidden="true"></i> الجلسات اليوم</div>
+            <div class="stat-val" id="statSessions">—</div>
+            <div class="stat-sub">spin attempts</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label"><i class="ti ti-message-exclamation stat-icon" aria-hidden="true"></i> شكاوى جديدة</div>
+            <div class="stat-val" id="statComplaints" style="color:var(--red)">—</div>
+            <div class="stat-sub">تحتاج مراجعة</div>
+          </div>
+        </div>
+
+        <div class="table-card">
+          <div class="table-header">
+            <div>
+              <div class="table-title">آخر الجلسات</div>
+              <div class="table-sub">أحدث تفاعلات العملاء</div>
+            </div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>الفرع</th><th>التقييم</th><th>الجايزة</th><th>المصدر</th><th>الحالة</th><th>الوقت</th>
+              </tr>
+            </thead>
+            <tbody id="dashSessionsTable">
+              <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">جاري التحميل...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══ PROVIDERS ══ -->
+      <div class="panel" id="panelProviders">
+        <div class="table-card">
+          <div class="table-header">
+            <div>
+              <div class="table-title">مزودو الخدمة</div>
+              <div class="table-sub">كل الأعمال المسجلة</div>
+            </div>
+            <button class="btn btn-gold btn-sm" onclick="openModal('modalProvider')">
+              <i class="ti ti-plus" aria-hidden="true"></i> إضافة
+            </button>
+          </div>
+          <table>
+            <thead><tr><th>الاسم</th><th>النوع</th><th>الفروع</th><th>الحالة</th><th>إجراءات</th></tr></thead>
+            <tbody id="providersTable">
+              <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px">جاري التحميل...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══ BRANCHES ══ -->
+      <div class="panel" id="panelBranches">
+        <div class="table-card">
+          <div class="table-header">
+            <div>
+              <div class="table-title">الفروع</div>
+              <div class="table-sub">كل فرع = اشتراك مستقل</div>
+            </div>
+            <button class="btn btn-gold btn-sm" onclick="openModal('modalBranch')">
+              <i class="ti ti-plus" aria-hidden="true"></i> فرع جديد
+            </button>
+          </div>
+          <table>
+            <thead><tr><th>الفرع</th><th>المتجر</th><th>الخطة</th><th>OTP</th><th>الحالة</th><th>إجراءات</th></tr></thead>
+          <tbody id="branchesTable">
+            <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">جاري التحميل...</td></tr>
+          </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══ PRIZES ══ -->
+      <div class="panel" id="panelPrizes">
+        <div class="table-card">
+          <div class="table-header">
+            <div>
+              <div class="table-title">إدارة الجوايز</div>
+              <div class="table-sub">اختر فرع لتعديل جوايزه</div>
+            </div>
+          </div>
+          <div style="padding:16px;border-bottom:1px solid rgba(255,255,255,.06)">
+            <select class="form-select" style="max-width:300px" id="prizeBranchSelect" onchange="loadPrizes(this.value)">
+              <option value="">اختر الفرع...</option>
+            </select>
+          </div>
+          <div id="prizesBuilder" style="padding:16px;display:none">
+            <div id="prizeRows"></div>
+            <div class="pct-total pct-ok" id="pctTotal">
+              <i class="ti ti-check" aria-hidden="true"></i>
+              <span id="pctTotalTxt">المجموع: 0 / 100</span>
+            </div>
+            <div style="margin-top:16px;display:flex;gap:10px">
+              <button class="btn btn-gold" onclick="savePrizes()">
+                <i class="ti ti-device-floppy" aria-hidden="true"></i> حفظ الجوايز
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ SESSIONS ══ -->
+      <div class="panel" id="panelSessions">
+        <div class="stats-grid" style="grid-template-columns:repeat(3,1fr)">
+          <div class="stat-card">
+            <div class="stat-label">Happy</div>
+            <div class="stat-val" id="sessHappy" style="color:var(--neon)">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Sad</div>
+            <div class="stat-val" id="sessSad" style="color:var(--pink)">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Review Clicks</div>
+            <div class="stat-val" id="sessReviews" style="color:var(--cyan)">—</div>
+          </div>
+        </div>
+        <div class="table-card">
+          <div class="table-header">
+            <div class="table-title">كل الجلسات</div>
+            <select class="form-select btn-sm" id="sessionBranchFilter" style="width:200px" onchange="loadSessions(this.value)">
+              <option value="">كل الفروع</option>
+            </select>
+          </div>
+          <table>
+            <thead><tr><th>الفرع</th><th>المصدر</th><th>التقييم</th><th>الجايزة</th><th>Review</th><th>Redeem</th><th>التاريخ</th></tr></thead>
+            <tbody id="sessionsTable">
+              <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">جاري التحميل...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══ COMPLAINTS ══ -->
+      <div class="panel" id="panelComplaints">
+        <div id="complaintsList">
+          <div style="text-align:center;color:var(--muted);padding:40px">جاري التحميل...</div>
+        </div>
+      </div>
+
+      <!-- ══ COUPONS ══ -->
+      <div class="panel" id="panelCoupons">
+        <div class="table-card">
+          <div class="table-header">
+            <div class="table-title">الكوبونات الصادرة</div>
+          </div>
+          <table>
+            <thead><tr><th>الكود</th><th>الجايزة</th><th>الفرع</th><th>الحالة</th><th>انتهاء الصلاحية</th></tr></thead>
+            <tbody id="couponsTable">
+              <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px">جاري التحميل...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /layout -->
+
+<!-- ══ MODAL: ADD PROVIDER ══ -->
+<div class="modal-overlay" id="modalProvider">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">إضافة مزود خدمة جديد</div>
+      <button class="modal-close" onclick="closeModal('modalProvider')">✕</button>
+    </div>
+    <div class="form-grid" style="margin-bottom:16px">
+      <div class="form-group">
+        <label class="form-label">الاسم بالعربي</label>
+        <input class="form-input" id="pName" placeholder="مطعم الأصيل">
+      </div>
+      <div class="form-group">
+        <label class="form-label">الاسم بالإنجليزي</label>
+        <input class="form-input" id="pNameEn" placeholder="Al Aseel Restaurant">
+      </div>
+    </div>
+    <div class="form-grid" style="margin-bottom:16px">
+      <div class="form-group">
+        <label class="form-label">نوع العمل</label>
+        <select class="form-select" id="pType">
+          <option value="restaurant">🍽️ مطعم</option>
+          <option value="salon">✂️ صالون</option>
+          <option value="coffee">☕ كوفي شوب</option>
+          <option value="gym">💪 جيم</option>
+          <option value="supermarket">🛒 سوبرماركت</option>
+          <option value="repair">👜 إصلاح</option>
+          <option value="other">📦 أخرى</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">الإيموجي / الأيقونة</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div class="prize-emoji-btn" id="pEmojiPreview" onclick="toggleEmojiPicker('pEmojiPicker','pEmojiPreview')">🍽️</div>
+          <input class="form-input" id="pEmoji" value="🍽️" style="width:80px;text-align:center" oninput="document.getElementById('pEmojiPreview').textContent=this.value">
+        </div>
+        <div class="emoji-grid" id="pEmojiPicker" style="display:none">
+          <div class="emoji-btn" onclick="setEmoji('pEmoji','pEmojiPreview','🍽️')">🍽️</div>
+          <div class="emoji-btn" onclick="setEmoji('pEmoji','pEmojiPreview','✂️')">✂️</div>
+          <div class="emoji-btn" onclick="setEmoji('pEmoji','pEmojiPreview','☕')">☕</div>
+          <div class="emoji-btn" onclick="setEmoji('pEmoji','pEmojiPreview','💪')">💪</div>
+          <div class="emoji-btn" onclick="setEmoji('pEmoji','pEmojiPreview','🛒')">🛒</div>
+          <div class="emoji-btn" onclick="setEmoji('pEmoji','pEmojiPreview','👜')">👜</div>
+          <div class="emoji-btn" onclick="setEmoji('pEmoji','pEmojiPreview','🏪')">🏪</div>
+          <div class="emoji-btn" onclick="setEmoji('pEmoji','pEmojiPreview','🏋️')">🏋️</div>
+          <div class="emoji-btn" onclick="setEmoji('pEmoji','pEmojiPreview','🍕')">🍕</div>
+          <div class="emoji-btn" onclick="setEmoji('pEmoji','pEmojiPreview','🍔')">🍔</div>
+          <div class="emoji-btn" onclick="setEmoji('pEmoji','pEmojiPreview','🧁')">🧁</div>
+          <div class="emoji-btn" onclick="setEmoji('pEmoji','pEmojiPreview','💈')">💈</div>
+          <div class="emoji-btn" onclick="setEmoji('pEmoji','pEmojiPreview','🎯')">🎯</div>
+          <div class="emoji-btn" onclick="setEmoji('pEmoji','pEmojiPreview','🎮')">🎮</div>
+          <div class="emoji-btn" onclick="setEmoji('pEmoji','pEmojiPreview','📱')">📱</div>
+          <div class="emoji-btn" onclick="setEmoji('pEmoji','pEmojiPreview','🚗')">🚗</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modalProvider')">إلغاء</button>
+      <button class="btn btn-gold" onclick="saveProvider()">
+        <i class="ti ti-plus" aria-hidden="true"></i> إضافة المتجر
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: ADD BRANCH ══ -->
+<div class="modal-overlay" id="modalBranch">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">إضافة فرع جديد</div>
+      <button class="modal-close" onclick="closeModal('modalBranch')">✕</button>
+    </div>
+    <div class="form-group" style="margin-bottom:16px">
+      <label class="form-label">المتجر</label>
+      <select class="form-select" id="bProvider"></select>
+    </div>
+    <div class="form-grid" style="margin-bottom:16px">
+      <div class="form-group">
+        <label class="form-label">اسم الفرع</label>
+        <input class="form-input" id="bName" placeholder="فرع المعادي">
+      </div>
+      <div class="form-group">
+        <label class="form-label">المدينة</label>
+        <input class="form-input" id="bCity" placeholder="القاهرة" value="القاهرة">
+      </div>
+    </div>
+    <div class="form-group" style="margin-bottom:16px">
+      <label class="form-label">العنوان</label>
+      <input class="form-input" id="bAddress" placeholder="شارع التسعين، المعادي">
+    </div>
+    <div class="form-grid" style="margin-bottom:16px">
+      <div class="form-group">
+        <label class="form-label">خطة الاشتراك</label>
+        <select class="form-select" id="bPlan">
+          <option value="basic">Basic — 199 ج/شهر</option>
+          <option value="pro">Pro — 399 ج/شهر</option>
+          <option value="enterprise">Enterprise — 999 ج+</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">OTP</label>
+        <div class="toggle-wrap" style="margin-top:10px">
+          <button class="toggle" id="bOtp" onclick="this.classList.toggle('on')"></button>
+          <span class="toggle-lbl">تفعيل التحقق برقم الموبايل</span>
+        </div>
+      </div>
+    </div>
+    <div style="background:var(--bg3);border-radius:var(--r);padding:14px;margin-bottom:16px">
+      <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px">روابط المراجعة</div>
+      <div class="form-group" style="margin-bottom:10px">
+        <label class="form-label">Google Maps Review URL</label>
+        <input class="form-input" id="bGoogle" placeholder="https://g.page/r/...">
+      </div>
+      <div class="form-group" style="margin-bottom:10px">
+        <label class="form-label">Facebook Page URL</label>
+        <input class="form-input" id="bFacebook" placeholder="https://facebook.com/...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Instagram Handle</label>
+        <input class="form-input" id="bInstagram" placeholder="https://instagram.com/...">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modalBranch')">إلغاء</button>
+      <button class="btn btn-gold" onclick="saveBranch()">
+        <i class="ti ti-plus" aria-hidden="true"></i> إضافة الفرع
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: EDIT BRANCH ══ -->
+<div class="modal-overlay" id="modalEditBranch">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">تعديل الفرع</div>
+      <button class="modal-close" onclick="closeModal('modalEditBranch')">✕</button>
+    </div>
+    <input type="hidden" id="editBranchId">
+    <div class="form-grid" style="margin-bottom:16px">
+      <div class="form-group">
+        <label class="form-label">اسم الفرع</label>
+        <input class="form-input" id="editBName">
+      </div>
+      <div class="form-group">
+        <label class="form-label">المدينة</label>
+        <input class="form-input" id="editBCity">
+      </div>
+    </div>
+    <div class="form-group" style="margin-bottom:16px">
+      <label class="form-label">العنوان</label>
+      <input class="form-input" id="editBAddress">
+    </div>
+    <div class="form-grid" style="margin-bottom:16px">
+      <div class="form-group">
+        <label class="form-label">خطة الاشتراك</label>
+        <select class="form-select" id="editBPlan">
+          <option value="basic">Basic</option>
+          <option value="pro">Pro</option>
+          <option value="enterprise">Enterprise</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">OTP</label>
+        <div class="toggle-wrap" style="margin-top:10px">
+          <button class="toggle" id="editBOtp" onclick="this.classList.toggle('on')"></button>
+          <span class="toggle-lbl">تفعيل OTP</span>
+        </div>
+      </div>
+    </div>
+    <div style="background:var(--bg3);border-radius:var(--r);padding:14px;margin-bottom:16px">
+      <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px">روابط المراجعة</div>
+      <div class="form-group" style="margin-bottom:10px">
+        <label class="form-label">Google Maps</label>
+        <input class="form-input" id="editBGoogle">
+      </div>
+      <div class="form-group" style="margin-bottom:10px">
+        <label class="form-label">Facebook</label>
+        <input class="form-input" id="editBFacebook">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Instagram</label>
+        <input class="form-input" id="editBInstagram">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modalEditBranch')">إلغاء</button>
+      <button class="btn btn-gold" onclick="updateBranch()">
+        <i class="ti ti-device-floppy" aria-hidden="true"></i> حفظ التعديلات
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--bg4);border:1px solid rgba(255,255,255,.1);border-radius:var(--r-pill);padding:10px 20px;font-size:12px;font-weight:700;color:var(--off);transition:transform .3s cubic-bezier(.34,1.56,.64,1);z-index:200;white-space:nowrap"></div>
+
+<script>
+const SUPABASE_URL  = 'https://ordbzocfzzrymhilvote.supabase.co'
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yZGJ6b2NmenpyeW1oaWx2b3RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTcyMTAsImV4cCI6MjA5NjYzMzIxMH0.q9uEWe5unC3-wKrQFjOgYvQZmEDfKQEzlxlObEGq0EY'
+
+const { createClient } = window.supabase
+const db = createClient(SUPABASE_URL, SUPABASE_ANON)
+
+const TYPE_LABELS = { restaurant:'🍽️ مطعم', salon:'✂️ صالون', coffee:'☕ كوفي', gym:'💪 جيم', supermarket:'🛒 سوبرماركت', repair:'👜 إصلاح', other:'📦 أخرى' }
+const PLAN_LABELS = { basic:'Basic', pro:'Pro', enterprise:'Enterprise' }
+const PRIZE_EMOJIS = ['🎁','🏷️','🥤','🍕','🍰','☕','💰','🎫','🎪','🎉','🍔','🍟','🧁','🍦','🎸','🏆','💎','🌟']
+
+let toast_timer
+
+function toast(msg, type='ok') {
+  const t = document.getElementById('toast')
+  t.textContent = msg
+  t.style.borderColor = type === 'err' ? 'rgba(255,59,59,.3)' : 'rgba(57,255,20,.2)'
+  t.style.transform = 'translateX(-50%) translateY(0)'
+  clearTimeout(toast_timer)
+  toast_timer = setTimeout(() => { t.style.transform = 'translateX(-50%) translateY(80px)' }, 2800)
+}
+
+function showPanel(id, el) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'))
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'))
+  document.getElementById('panel' + id.charAt(0).toUpperCase() + id.slice(1)).classList.add('active')
+  if (el) el.classList.add('active')
+  const titles = {
+    dashboard:  ['لوحة التحكم',   'نظرة عامة على النظام'],
+    providers:  ['مزودو الخدمة',  'كل الأعمال المسجلة في النظام'],
+    branches:   ['الفروع',         'كل فرع = اشتراك مستقل'],
+    prizes:     ['الجوايز',        'تحكم في جوايز كل فرع'],
+    sessions:   ['الجلسات',        'تتبع تفاعلات العملاء'],
+    complaints: ['الشكاوى',        'شكاوى العملاء غير الراضيين'],
+    coupons:    ['الكوبونات',      'كوبونات صادرة ومستبدلة'],
+  }
+  if (titles[id]) {
+    document.getElementById('pageTitle').textContent = titles[id][0]
+    document.getElementById('pageSub').textContent   = titles[id][1]
+  }
+  if (id === 'dashboard')  loadDashboard()
+  if (id === 'providers')  loadProviders()
+  if (id === 'branches')   loadBranches()
+  if (id === 'prizes')     loadPrizeBranchSelect()
+  if (id === 'sessions')   loadSessions()
+  if (id === 'complaints') loadComplaints()
+  if (id === 'coupons')    loadCoupons()
+}
+
+function openModal(id) { document.getElementById(id).classList.add('open') }
+function closeModal(id) { document.getElementById(id).classList.remove('open') }
+
+function toggleEmojiPicker(pickerId, previewId) {
+  const p = document.getElementById(pickerId)
+  p.style.display = p.style.display === 'none' ? 'grid' : 'none'
+}
+function setEmoji(inputId, previewId, emoji) {
+  document.getElementById(inputId).value = emoji
+  document.getElementById(previewId).textContent = emoji
+}
+
+function timeSince(ts) {
+  if (!ts) return '—'
+  const d = Math.floor((Date.now() - new Date(ts)) / 1000)
+  if (d < 60)  return 'الآن'
+  if (d < 3600) return Math.floor(d/60) + ' د'
+  if (d < 86400) return Math.floor(d/3600) + ' س'
+  return Math.floor(d/86400) + ' يوم'
+}
+
+// ── DASHBOARD ──────────────────────────────────────────────
+async function loadDashboard() {
+  const [provRes, brRes, sessRes, compRes] = await Promise.all([
+    db.from('providers').select('id', { count:'exact', head:true }),
+    db.from('branches').select('id', { count:'exact', head:true }).eq('is_active', true),
+    db.from('sessions').select('id', { count:'exact', head:true }).gte('created_at', new Date(Date.now()-86400000).toISOString()),
+    db.from('complaints').select('id', { count:'exact', head:true }).eq('status', 'new'),
+  ])
+  document.getElementById('statProviders').textContent  = provRes.count ?? 0
+  document.getElementById('statBranches').textContent   = brRes.count ?? 0
+  document.getElementById('statSessions').textContent   = sessRes.count ?? 0
+  document.getElementById('statComplaints').textContent = compRes.count ?? 0
+  document.getElementById('complaintsCount').textContent = compRes.count ?? 0
+
+  const { data: sessions } = await db
+    .from('sessions')
+    .select('*, branches(name, providers(name))')
+    .order('created_at', { ascending: false })
+    .limit(8)
+
+  const tbody = document.getElementById('dashSessionsTable')
+  if (!sessions?.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">لا توجد جلسات بعد</td></tr>'; return }
+  tbody.innerHTML = sessions.map(s => `
+    <tr>
+      <td>${s.branches?.name || '—'}</td>
+      <td>${s.rating === 'happy' ? '<span class="badge badge-green">😊 ممتاز</span>' : s.rating === 'sad' ? '<span class="badge badge-red">😞 Sad</span>' : '<span class="badge badge-gray">—</span>'}</td>
+      <td>${s.spin_result || '—'}</td>
+      <td><span class="badge badge-cyan">${s.source || 'qr'}</span></td>
+      <td>${s.redeemed ? '<span class="badge badge-gold">✓ Redeemed</span>' : s.coupon_code ? '<span class="badge badge-green">كود صادر</span>' : '<span class="badge badge-gray">جديد</span>'}</td>
+      <td style="color:var(--muted)">${timeSince(s.created_at)}</td>
+    </tr>`).join('')
+}
+
+// ── PROVIDERS ──────────────────────────────────────────────
+async function loadProviders() {
+  const { data } = await db.from('providers').select('*, branches(id)').order('created_at', { ascending: false })
+  const tbody = document.getElementById('providersTable')
+  if (!data?.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px">لا يوجد متاجر بعد — أضف أول متجر</td></tr>'; return }
+  tbody.innerHTML = data.map(p => `
+    <tr>
+      <td><span style="font-size:18px;margin-left:8px">${p.logo_emoji||'📦'}</span>${p.name}</td>
+      <td>${TYPE_LABELS[p.type] || p.type}</td>
+      <td><span class="badge badge-cyan">${p.branches?.length || 0} فرع</span></td>
+      <td><span class="badge ${p.is_active ? 'badge-green' : 'badge-gray'}">${p.is_active ? 'نشط' : 'متوقف'}</span></td>
+      <td>
+        <button class="btn btn-ghost btn-sm" onclick="toggleProvider('${p.id}',${!p.is_active})">${p.is_active ? 'إيقاف' : 'تفعيل'}</button>
+      </td>
+    </tr>`).join('')
+}
+
+async function saveProvider() {
+  const name = document.getElementById('pName').value.trim()
+  if (!name) { toast('اكتب اسم المتجر', 'err'); return }
+  const { error } = await db.from('providers').insert({
+    name, name_en: document.getElementById('pNameEn').value,
+    type: document.getElementById('pType').value,
+    logo_emoji: document.getElementById('pEmoji').value || '📦'
+  })
+  if (error) { toast('خطأ: ' + error.message, 'err'); return }
+  toast('✅ تم إضافة المتجر')
+  closeModal('modalProvider')
+  loadProviders()
+  loadBranchProviderSelect()
+}
+
+async function toggleProvider(id, state) {
+  await db.from('providers').update({ is_active: state }).eq('id', id)
+  loadProviders()
+}
+
+// ── BRANCHES ──────────────────────────────────────────────
+async function loadBranches() {
+  const { data } = await db.from('branches').select('*, providers(name, logo_emoji)').order('created_at', { ascending: false })
+  const tbody = document.getElementById('branchesTable')
+  if (!data?.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">لا يوجد فروع بعد</td></tr>'; return }
+  tbody.innerHTML = data.map(b => `
+    <tr>
+      <td>${b.name}</td>
+      <td>${b.providers?.logo_emoji || ''} ${b.providers?.name || '—'}</td>
+      <td><span class="badge badge-gold">${PLAN_LABELS[b.subscription_plan] || b.subscription_plan}</span></td>
+      <td><span class="badge ${b.otp_enabled ? 'badge-cyan' : 'badge-gray'}">${b.otp_enabled ? 'مفعل' : 'معطل'}</span></td>
+      <td><span class="badge ${b.is_active ? 'badge-green' : 'badge-gray'}">${b.is_active ? 'نشط' : 'متوقف'}</span></td>
+      <td style="display:flex;gap:6px;padding:8px 18px">
+        <button class="btn btn-ghost btn-sm" onclick="editBranch(${JSON.stringify(b).replace(/"/g,'&quot;')})">
+          <i class="ti ti-edit" aria-hidden="true"></i>
+        </button>
+        <button class="btn btn-ghost btn-sm" onclick="copyBranchLink('${b.id}')">
+          <i class="ti ti-link" aria-hidden="true"></i>
+        </button>
+      </td>
+    </tr>`).join('')
+}
+
+async function loadBranchProviderSelect() {
+  const { data } = await db.from('providers').select('id,name,logo_emoji').eq('is_active', true)
+  const sel = document.getElementById('bProvider')
+  sel.innerHTML = (data||[]).map(p => `<option value="${p.id}">${p.logo_emoji} ${p.name}</option>`).join('')
+}
+
+async function saveBranch() {
+  const name = document.getElementById('bName').value.trim()
+  if (!name) { toast('اكتب اسم الفرع', 'err'); return }
+  const { data: branch, error } = await db.from('branches').insert({
+    provider_id: document.getElementById('bProvider').value,
+    name,
+    city: document.getElementById('bCity').value,
+    address: document.getElementById('bAddress').value,
+    subscription_plan: document.getElementById('bPlan').value,
+    otp_enabled: document.getElementById('bOtp').classList.contains('on'),
+    google_review_url: document.getElementById('bGoogle').value,
+    facebook_review_url: document.getElementById('bFacebook').value,
+    instagram_url: document.getElementById('bInstagram').value,
+  }).select().single()
+  if (error) { toast('خطأ: ' + error.message, 'err'); return }
+  // Add default 8 prizes for new branch
+  await addDefaultPrizes(branch.id)
+  toast('✅ تم إضافة الفرع + 8 جوايز افتراضية')
+  closeModal('modalBranch')
+  loadBranches()
+}
+
+async function addDefaultPrizes(branchId) {
+  const defaults = [
+    { sort_order:0, label:'خصم ١٠٪',       emoji:'🏷️', probability:20, is_win:true,  valid_days:7 },
+    { sort_order:1, label:'مشروب مجاني',   emoji:'🥤', probability:10, is_win:true,  valid_days:7 },
+    { sort_order:2, label:'حظ أحسن',       emoji:'😅', probability:10, is_win:false, valid_days:0 },
+    { sort_order:3, label:'خصم ٥٪',        emoji:'🎫', probability:20, is_win:true,  valid_days:7 },
+    { sort_order:4, label:'ديسرت مجاني',   emoji:'🍰', probability:10, is_win:true,  valid_days:7 },
+    { sort_order:5, label:'وجبة مجانية',   emoji:'🎁', probability: 5, is_win:true,  valid_days:7, sad_bonus_pct:20 },
+    { sort_order:6, label:'خصم ١٥٪',       emoji:'💰', probability:15, is_win:true,  valid_days:7 },
+    { sort_order:7, label:'قهوة مجانية',   emoji:'☕', probability:10, is_win:true,  valid_days:7 },
+  ].map(p => ({ ...p, branch_id: branchId }))
+  await db.from('prizes').insert(defaults)
+}
+
+function editBranch(b) {
+  document.getElementById('editBranchId').value = b.id
+  document.getElementById('editBName').value     = b.name
+  document.getElementById('editBCity').value     = b.city || ''
+  document.getElementById('editBAddress').value  = b.address || ''
+  document.getElementById('editBPlan').value     = b.subscription_plan
+  document.getElementById('editBGoogle').value   = b.google_review_url || ''
+  document.getElementById('editBFacebook').value = b.facebook_review_url || ''
+  document.getElementById('editBInstagram').value= b.instagram_url || ''
+  const otp = document.getElementById('editBOtp')
+  b.otp_enabled ? otp.classList.add('on') : otp.classList.remove('on')
+  openModal('modalEditBranch')
+}
+
+async function updateBranch() {
+  const id = document.getElementById('editBranchId').value
+  const { error } = await db.from('branches').update({
+    name:                document.getElementById('editBName').value,
+    city:                document.getElementById('editBCity').value,
+    address:             document.getElementById('editBAddress').value,
+    subscription_plan:   document.getElementById('editBPlan').value,
+    otp_enabled:         document.getElementById('editBOtp').classList.contains('on'),
+    google_review_url:   document.getElementById('editBGoogle').value,
+    facebook_review_url: document.getElementById('editBFacebook').value,
+    instagram_url:       document.getElementById('editBInstagram').value,
+  }).eq('id', id)
+  if (error) { toast('خطأ: ' + error.message, 'err'); return }
+  toast('✅ تم حفظ التعديلات')
+  closeModal('modalEditBranch')
+  loadBranches()
+}
+
+function copyBranchLink(branchId) {
+  const url = `${window.location.origin}/index.html?branch=${branchId}&src=qr`
+  navigator.clipboard?.writeText(url)
+  toast('📋 تم نسخ رابط الفرع')
+}
+
+// ── PRIZES ─────────────────────────────────────────────────
+async function loadPrizeBranchSelect() {
+  const { data } = await db.from('branches').select('id, name, providers(name)').eq('is_active', true)
+  const sel = document.getElementById('prizeBranchSelect')
+  const filterSel = document.getElementById('sessionBranchFilter')
+  const opts = (data||[]).map(b => `<option value="${b.id}">${b.providers?.name} — ${b.name}</option>`).join('')
+  sel.innerHTML = '<option value="">اختر الفرع...</option>' + opts
+  filterSel.innerHTML = '<option value="">كل الفروع</option>' + opts
+}
+
+async function loadPrizes(branchId) {
+  if (!branchId) return
+  const builder = document.getElementById('prizesBuilder')
+  builder.style.display = 'block'
+  const { data } = await db.from('prizes').select('*').eq('branch_id', branchId).order('sort_order')
+  renderPrizeRows(data || [], branchId)
+}
+
+function renderPrizeRows(prizes, branchId) {
+  const cont = document.getElementById('prizeRows')
+  cont.innerHTML = prizes.map((p, i) => `
+    <div class="prize-row" data-id="${p.id}" data-branch="${branchId}">
+      <div class="prize-num">${i+1}</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div class="prize-emoji-btn" onclick="cyclePrizeEmoji(this)" data-emojis='${JSON.stringify(PRIZE_EMOJIS)}' title="اضغط لتغيير الإيموجي">${p.emoji}</div>
+        <input class="form-input" value="${p.label}" placeholder="اسم الجايزة" style="flex:1">
+      </div>
+      <input class="prize-pct-input" type="number" min="0" max="100" value="${p.probability}" oninput="updatePctTotal()" title="نسبة الفوز %">
+      <select class="form-select" style="padding:6px 8px;font-size:12px">
+        <option value="true" ${p.is_win?'selected':''}>جايزة حقيقية</option>
+        <option value="false" ${!p.is_win?'selected':''}>حظ أحسن</option>
+      </select>
+      <input class="prize-pct-input" type="number" min="0" max="365" value="${p.valid_days||7}" title="صلاحية بالأيام">
+      <button class="btn btn-red btn-sm" style="padding:6px 8px" onclick="deletePrize('${p.id}','${branchId}')">
+        <i class="ti ti-trash" aria-hidden="true"></i>
+      </button>
+    </div>`).join('')
+  updatePctTotal()
+}
+
+function cyclePrizeEmoji(btn) {
+  const emojis = JSON.parse(btn.dataset.emojis)
+  const idx = emojis.indexOf(btn.textContent)
+  btn.textContent = emojis[(idx + 1) % emojis.length]
+}
+
+function updatePctTotal() {
+  const inputs = document.querySelectorAll('.prize-pct-input:first-of-type, .prize-row input[type="number"]:nth-child(1)')
+  let total = 0
+  document.querySelectorAll('.prize-row').forEach(row => {
+    const pct = parseInt(row.querySelector('input[type="number"]')?.value || 0)
+    total += pct
+  })
+  const el = document.getElementById('pctTotal')
+  const txt = document.getElementById('pctTotalTxt')
+  txt.textContent = `المجموع: ${total} / 100`
+  el.className = 'pct-total ' + (total === 100 ? 'pct-ok' : 'pct-err')
+  el.querySelector('i').className = total === 100 ? 'ti ti-check' : 'ti ti-alert-triangle'
+}
+
+async function savePrizes() {
+  const rows = document.querySelectorAll('.prize-row')
+  let total = 0
+  const updates = []
+  rows.forEach((row, i) => {
+    const inputs = row.querySelectorAll('input')
+    const selects = row.querySelectorAll('select')
+    const prob = parseInt(inputs[1]?.value || 0)
+    total += prob
+    updates.push({
+      id: row.dataset.id,
+      emoji: row.querySelector('.prize-emoji-btn').textContent,
+      label: inputs[0]?.value,
+      probability: prob,
+      is_win: selects[0]?.value === 'true',
+      valid_days: parseInt(inputs[2]?.value || 7),
+      sort_order: i
+    })
+  })
+  if (total !== 100) { toast('المجموع لازم يكون 100%  — دلوقتي: ' + total, 'err'); return }
+  for (const u of updates) {
+    const { id, ...data } = u
+    await db.from('prizes').update(data).eq('id', id)
+  }
+  toast('✅ تم حفظ الجوايز')
+}
+
+async function deletePrize(id, branchId) {
+  if (!confirm('مسح الجايزة؟')) return
+  await db.from('prizes').delete().eq('id', id)
+  toast('تم المسح')
+  loadPrizes(branchId)
+}
+
+// ── SESSIONS ───────────────────────────────────────────────
+async function loadSessions(branchId = '') {
+  let q = db.from('sessions').select('*, branches(name, providers(name))').order('created_at', { ascending: false }).limit(50)
+  if (branchId) q = q.eq('branch_id', branchId)
+  const { data } = await q
+
+  const happy = data?.filter(s => s.rating === 'happy').length || 0
+  const sad   = data?.filter(s => s.rating === 'sad').length   || 0
+  const rev   = data?.filter(s => s.review_clicked).length     || 0
+  document.getElementById('sessHappy').textContent  = happy
+  document.getElementById('sessSad').textContent    = sad
+  document.getElementById('sessReviews').textContent = rev
+
+  const tbody = document.getElementById('sessionsTable')
+  if (!data?.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">لا توجد جلسات</td></tr>'; return }
+  tbody.innerHTML = data.map(s => `
+    <tr>
+      <td>${s.branches?.providers?.name || ''} — ${s.branches?.name || '—'}</td>
+      <td><span class="badge badge-cyan">${s.source || 'qr'}</span></td>
+      <td>${s.rating === 'happy' ? '<span class="badge badge-green">😊</span>' : s.rating === 'sad' ? '<span class="badge badge-red">😞</span>' : '—'}</td>
+      <td style="font-size:12px">${s.spin_result || '—'}</td>
+      <td>${s.review_clicked ? '<span class="badge badge-green">✓</span>' : '—'}</td>
+      <td>${s.redeemed ? '<span class="badge badge-gold">✓</span>' : s.coupon_code ? '<span class="badge badge-cyan">صادر</span>' : '—'}</td>
+      <td style="color:var(--muted);font-size:12px">${timeSince(s.created_at)}</td>
+    </tr>`).join('')
+}
+
+// ── COMPLAINTS ─────────────────────────────────────────────
+async function loadComplaints() {
+  const { data } = await db.from('complaints').select('*, sessions(phone,source), branches(name,providers(name))').order('created_at', { ascending: false })
+  const cont = document.getElementById('complaintsList')
+  if (!data?.length) { cont.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px">لا توجد شكاوى</div>'; return }
+  cont.innerHTML = data.map(c => `
+    <div class="complaint-card" id="complaint-${c.id}">
+      <div class="complaint-meta">
+        <span class="badge badge-red">😞 شكوى</span>
+        <span class="badge badge-cyan">${c.branches?.providers?.name} — ${c.branches?.name}</span>
+        <span class="badge badge-gray">${c.sessions?.source || 'qr'}</span>
+        <span style="margin-right:auto;font-size:11px;color:var(--muted)">${timeSince(c.created_at)}</span>
+        <span class="badge ${c.status === 'new' ? 'badge-red' : c.status === 'resolved' ? 'badge-green' : 'badge-gray'}">${c.status === 'new' ? 'جديد' : c.status === 'resolved' ? 'محلول' : c.status}</span>
+      </div>
+      ${c.chips?.length ? `<div class="complaint-chips-row">${c.chips.map(ch => `<span class="complaint-chip">${ch}</span>`).join('')}</div>` : ''}
+      ${c.text ? `<div class="complaint-text">${c.text}</div>` : '<div class="complaint-text" style="color:var(--muted)">لم يكتب تفاصيل</div>'}
+      <div class="complaint-actions">
+        <button class="btn btn-ghost btn-sm" onclick="resolveComplaint('${c.id}')">
+          <i class="ti ti-check" aria-hidden="true"></i> تم الحل
+        </button>
+        <button class="btn btn-ghost btn-sm" onclick="ignoreComplaint('${c.id}')">
+          <i class="ti ti-x" aria-hidden="true"></i> تجاهل
+        </button>
+      </div>
+    </div>`).join('')
+}
+
+async function resolveComplaint(id) {
+  await db.from('complaints').update({ status: 'resolved', resolved_at: new Date().toISOString() }).eq('id', id)
+  toast('✅ تم تحديد الشكوى كمحلولة')
+  loadComplaints()
+}
+async function ignoreComplaint(id) {
+  await db.from('complaints').update({ status: 'ignored' }).eq('id', id)
+  toast('تم التجاهل')
+  loadComplaints()
+}
+
+// ── COUPONS ────────────────────────────────────────────────
+async function loadCoupons() {
+  const { data } = await db.from('sessions').select('coupon_code, spin_result, redeemed, coupon_expires_at, branches(name, providers(name))').not('coupon_code', 'is', null).order('coupon_issued_at', { ascending: false }).limit(50)
+  const tbody = document.getElementById('couponsTable')
+  if (!data?.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px">لا توجد كوبونات بعد</td></tr>'; return }
+  tbody.innerHTML = data.map(s => {
+    const expired = s.coupon_expires_at && new Date(s.coupon_expires_at) < new Date()
+    return `<tr>
+      <td style="font-family:monospace;font-size:12px;color:var(--cyan)">${s.coupon_code}</td>
+      <td>${s.spin_result || '—'}</td>
+      <td>${s.branches?.providers?.name} — ${s.branches?.name}</td>
+      <td>${s.redeemed ? '<span class="badge badge-gold">✓ مستبدل</span>' : expired ? '<span class="badge badge-red">منتهي</span>' : '<span class="badge badge-green">صالح</span>'}</td>
+      <td style="color:var(--muted);font-size:12px">${s.coupon_expires_at ? new Date(s.coupon_expires_at).toLocaleDateString('ar-EG') : '—'}</td>
+    </tr>`}).join('')
+}
+
+// ── INIT ───────────────────────────────────────────────────
+async function loadAll() {
+  await loadDashboard()
+  await loadBranchProviderSelect()
+}
+
+loadAll()
+</script>
+</body>
+</html>
