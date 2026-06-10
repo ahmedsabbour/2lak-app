@@ -523,11 +523,14 @@ tr:hover td{background:rgba(255,255,255,.02)}
         <label class="form-label">نوع العمل</label>
         <select class="form-select" id="pType">
           <option value="restaurant">🍽️ مطعم</option>
-          <option value="salon">✂️ صالون</option>
           <option value="coffee">☕ كوفي شوب</option>
+          <option value="salon">✂️ صالون</option>
           <option value="gym">💪 جيم</option>
           <option value="supermarket">🛒 سوبرماركت</option>
-          <option value="repair">👜 إصلاح</option>
+          <option value="grocery">🧺 بقالة / جروسري</option>
+          <option value="food_factory">🏭 مصنع أغذية</option>
+          <option value="maintenance">🔧 مركز صيانة</option>
+          <option value="repair">👜 إصلاح شنط</option>
           <option value="other">📦 أخرى</option>
         </select>
       </div>
@@ -554,6 +557,13 @@ tr:hover td{background:rgba(255,255,255,.02)}
           <div class="emoji-btn" onclick="setEmoji('pEmoji','pEmojiPreview','🎮')">🎮</div>
           <div class="emoji-btn" onclick="setEmoji('pEmoji','pEmojiPreview','📱')">📱</div>
           <div class="emoji-btn" onclick="setEmoji('pEmoji','pEmojiPreview','🚗')">🚗</div>
+          <div class="emoji-btn" onclick="setEmoji('pEmoji','pEmojiPreview','🧺')">🧺</div>
+          <div class="emoji-btn" onclick="setEmoji('pEmoji','pEmojiPreview','🏭')">🏭</div>
+          <div class="emoji-btn" onclick="setEmoji('pEmoji','pEmojiPreview','🔧')">🔧</div>
+          <div class="emoji-btn" onclick="setEmoji('pEmoji','pEmojiPreview','🛠️')">🛠️</div>
+          <div class="emoji-btn" onclick="setEmoji('pEmoji','pEmojiPreview','🥩')">🥩</div>
+          <div class="emoji-btn" onclick="setEmoji('pEmoji','pEmojiPreview','🥖')">🥖</div>
+          <div class="emoji-btn" onclick="setEmoji('pEmoji','pEmojiPreview','🧀')">🧀</div>
         </div>
       </div>
     </div>
@@ -705,7 +715,7 @@ const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 const { createClient } = window.supabase
 const db = createClient(SUPABASE_URL, SUPABASE_ANON)
 
-const TYPE_LABELS = { restaurant:'🍽️ مطعم', salon:'✂️ صالون', coffee:'☕ كوفي', gym:'💪 جيم', supermarket:'🛒 سوبرماركت', repair:'👜 إصلاح', other:'📦 أخرى' }
+const TYPE_LABELS = { restaurant:'🍽️ مطعم', coffee:'☕ كوفي', salon:'✂️ صالون', gym:'💪 جيم', supermarket:'🛒 سوبرماركت', grocery:'🧺 جروسري', food_factory:'🏭 مصنع أغذية', maintenance:'🔧 صيانة', repair:'👜 إصلاح', other:'📦 أخرى' }
 const PLAN_LABELS = { basic:'Basic', pro:'Pro', enterprise:'Enterprise' }
 const PRIZE_EMOJIS = ['🎁','🏷️','🥤','🍕','🍰','☕','💰','🎫','🎪','🎉','🍔','🍟','🧁','🍦','🎸','🏆','💎','🌟']
 
