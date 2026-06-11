@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
+<title>2lak — Staff Redeem</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Rubik:wght@800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+:root{
+  --bg:#050508;--bg2:#0A0A0F;--bg3:#111118;--bg4:#18181F;
+  --gold:#FFD93D;--gold2:#FF9F1C;
+  --neon:#39FF14;--cyan:#00F5FF;--pink:#FF2D9B;
+  --white:#FFFFFF;--off:#C8C5BE;--muted:#555560;--muted2:#222230;
+  --red:#FF3B3B;--green:#39FF14;
+  --r:16px;--r-sm:10px;--r-pill:999px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{
+  min-height:100%;background:var(--bg);
+  font-family:'Cairo',sans-serif;color:var(--off);
+}
+
+/* aura */
+.aura{position:fixed;pointer-events:none;z-index:0;border-radius:50%;filter:blur(80px);opacity:.12}
+.aura-1{width:350px;height:350px;top:-80px;right:-80px;background:radial-gradient(circle,#FFD93D,transparent 70%)}
+.aura-2{width:280px;height:280px;bottom:-60px;left:-60px;background:radial-gradient(circle,#39FF14,transparent 70%)}
+
+.app{
+  max-width:420px;margin:0 auto;min-height:100dvh;
+  position:relative;z-index:1;
+  display:flex;flex-direction:column;align-items:center;
+  padding:24px 20px 40px;
+}
+
+/* ── HEADER ── */
+.header{
+  width:100%;display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:28px;
+}
+.logo{
+  font-family:'Rubik',sans-serif;font-size:22px;font-weight:900;
+  color:var(--gold);text-shadow:0 0 14px rgba(255,217,61,.5);
+}
+.staff-chip{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(0,245,255,.08);border:1px solid rgba(0,245,255,.2);
+  border-radius:var(--r-pill);padding:5px 12px;
+  font-size:11px;font-weight:700;color:var(--cyan);
+}
+
+/* ── STATES ── */
+.state{display:none;width:100%;flex-direction:column;align-items:center;gap:0;}
+.state.active{display:flex;}
+
+/* ── LOADING ── */
+.loading-wrap{text-align:center;padding:60px 0;}
+.spinner{
+  width:48px;height:48px;border-radius:50%;
+  border:3px solid var(--muted2);
+  border-top-color:var(--gold);
+  animation:spin .8s linear infinite;
+  margin:0 auto 16px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-txt{font-size:14px;color:var(--muted)}
+
+/* ── ERROR ── */
+.error-wrap{text-align:center;padding:40px 0;}
+.error-icon{font-size:52px;margin-bottom:12px}
+.error-title{font-size:18px;font-weight:900;color:var(--white);font-family:'Rubik',sans-serif;margin-bottom:6px}
+.error-sub{font-size:13px;color:var(--muted);line-height:1.6}
+
+/* ── PRIZE CARD ── */
+.prize-card{
+  width:100%;
+  background:var(--bg2);
+  border:1px solid rgba(255,217,61,.2);
+  border-radius:var(--r);overflow:hidden;
+  margin-bottom:16px;
+}
+.prize-top{
+  padding:22px 20px;text-align:center;
+  background:linear-gradient(145deg,#1A1400,#0E0E00);
+  position:relative;
+  border-bottom:1px solid rgba(255,217,61,.12);
+}
+.prize-top::before{
+  content:'';position:absolute;top:-20px;left:50%;transform:translateX(-50%);
+  width:160px;height:70px;
+  background:radial-gradient(ellipse,rgba(255,217,61,.2) 0%,transparent 70%);
+}
+.prize-emoji{font-size:52px;display:block;margin-bottom:10px;}
+.prize-name{
+  font-size:22px;font-weight:900;color:var(--gold);
+  font-family:'Rubik',sans-serif;
+  text-shadow:0 0 16px rgba(255,217,61,.4);
+  margin-bottom:4px;
+}
+.prize-shop{font-size:12px;color:var(--muted);}
+
+.prize-bottom{padding:12px 18px;}
+.prize-meta{
+  display:flex;align-items:center;gap:6px;
+  font-size:11px;color:var(--muted);margin-bottom:4px;
+}
+.coupon-id-row{
+  font-family:monospace;font-size:10px;color:var(--muted2);
+  margin-top:6px;word-break:break-all;
+}
+
+/* STATUS BADGES */
+.status-row{
+  display:flex;align-items:center;justify-content:center;
+  gap:8px;margin-bottom:16px;
+}
+.status-dot{
+  width:10px;height:10px;border-radius:50%;flex-shrink:0;
+}
+.dot-valid{background:var(--neon);box-shadow:0 0 8px var(--neon);}
+.dot-used{background:var(--muted);}
+.dot-expired{background:var(--red);}
+.status-txt{font-size:13px;font-weight:700;}
+.txt-valid{color:var(--neon);}
+.txt-used{color:var(--muted);}
+.txt-expired{color:var(--red);}
+
+/* ── VERIFY SECTION ── */
+.verify-card{
+  width:100%;
+  background:var(--bg3);
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:var(--r);padding:18px;
+  margin-bottom:16px;
+}
+.verify-title{
+  font-size:12px;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px;
+}
+.reg-phone-display{
+  font-size:30px;font-weight:900;color:var(--gold);
+  letter-spacing:3px;direction:ltr;text-align:center;
+  font-family:monospace;
+  text-shadow:0 0 12px rgba(255,217,61,.35);
+  margin-bottom:8px;
+}
+.no-phone-note{
+  font-size:12px;color:var(--muted);text-align:center;
+  margin-bottom:12px;line-height:1.6;
+}
+.verify-input-row{display:flex;gap:8px;margin-bottom:10px;}
+.verify-input{
+  flex:1;background:var(--bg4);
+  border:1.5px solid var(--muted2);border-radius:var(--r-sm);
+  padding:12px 14px;font-family:'Cairo',sans-serif;
+  font-size:15px;color:var(--white);outline:none;
+  direction:ltr;text-align:center;letter-spacing:2px;
+  transition:border-color .2s;
+}
+.verify-input:focus{border-color:rgba(255,217,61,.4);}
+.verify-input::placeholder{color:var(--muted);letter-spacing:0;font-size:13px;}
+.verify-btn{
+  background:var(--muted2);border:none;border-radius:var(--r-sm);
+  padding:12px 16px;cursor:pointer;
+  color:var(--off);font-size:16px;
+  transition:background .15s;flex-shrink:0;
+}
+.verify-btn:hover{background:var(--bg4);}
+
+.match-result{
+  border-radius:var(--r-sm);padding:9px 12px;
+  font-size:12px;font-weight:700;text-align:center;
+  display:none;
+}
+.match-ok{background:rgba(57,255,20,.08);border:1px solid rgba(57,255,20,.2);color:var(--neon);}
+.match-err{background:rgba(255,59,59,.08);border:1px solid rgba(255,59,59,.2);color:var(--red);}
+
+/* ── ACTION BUTTONS ── */
+.actions{width:100%;display:flex;flex-direction:column;gap:10px;}
+.btn-redeem{
+  width:100%;padding:17px;border-radius:var(--r);
+  background:transparent;border:1.5px solid rgba(57,255,20,.4);
+  color:var(--neon);font-family:'Rubik',sans-serif;
+  font-size:17px;font-weight:900;cursor:pointer;
+  text-shadow:0 0 10px rgba(57,255,20,.4);
+  box-shadow:0 0 20px rgba(57,255,20,.08);
+  transition:all .2s;
+}
+.btn-redeem:not(:disabled):hover{
+  background:rgba(57,255,20,.06);
+  box-shadow:0 0 28px rgba(57,255,20,.15);
+}
+.btn-redeem:disabled{
+  opacity:.25;cursor:not-allowed;
+  border-color:var(--muted2);color:var(--muted);
+  text-shadow:none;box-shadow:none;
+}
+.btn-redeem:not(:disabled):active{transform:scale(.97);}
+
+.btn-later{
+  width:100%;padding:14px;border-radius:var(--r);
+  background:transparent;border:1px solid var(--muted2);
+  color:var(--muted);font-family:'Cairo',sans-serif;
+  font-size:14px;font-weight:700;cursor:pointer;
+  transition:all .15s;
+}
+.btn-later:hover{border-color:rgba(255,255,255,.12);color:var(--off);}
+.btn-later:active{transform:scale(.98);}
+
+/* ── DONE STATES ── */
+.done-card{
+  width:100%;text-align:center;
+  background:var(--bg2);border-radius:var(--r);
+  padding:32px 24px;
+}
+.done-icon{font-size:56px;display:block;margin-bottom:16px;animation:pop-in .5s cubic-bezier(.34,1.56,.64,1);}
+@keyframes pop-in{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+.done-title{font-size:22px;font-weight:900;font-family:'Rubik',sans-serif;margin-bottom:6px;}
+.done-title.success{color:var(--neon);text-shadow:0 0 16px rgba(57,255,20,.3);}
+.done-title.deferred{color:var(--gold);}
+.done-sub{font-size:13px;color:var(--muted);line-height:1.6;}
+.done-coupon{
+  font-family:monospace;font-size:13px;color:var(--muted2);
+  margin-top:12px;
+}
+
+/* ── EXPIRED / USED BLOCK ── */
+.blocked-card{
+  width:100%;text-align:center;
+  background:var(--bg2);border-radius:var(--r);
+  padding:32px 24px;
+}
+</style>
+</head>
+<body>
+
+<div class="aura aura-1"></div>
+<div class="aura aura-2"></div>
+
+<div class="app">
+
+  <div class="header">
+    <div class="logo">2lak</div>
+    <div class="staff-chip">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Staff Portal
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div class="state active" id="stateLoading">
+    <div class="loading-wrap">
+      <div class="spinner"></div>
+      <div class="loading-txt">جاري تحميل بيانات الكوبون...</div>
+    </div>
+  </div>
+
+  <!-- ERROR -->
+  <div class="state" id="stateError">
+    <div class="error-wrap">
+      <div class="error-icon">🔍</div>
+      <div class="error-title">كوبون غير موجود</div>
+      <div class="error-sub" id="errorMsg">تأكد من الـ QR Code أو تواصل مع الإدارة</div>
+    </div>
+  </div>
+
+  <!-- EXPIRED -->
+  <div class="state" id="stateExpired">
+    <div class="blocked-card">
+      <span style="font-size:48px;display:block;margin-bottom:14px;">⌛</span>
+      <div style="font-size:20px;font-weight:900;color:var(--red);font-family:'Rubik',sans-serif;margin-bottom:6px;">انتهت الصلاحية</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.6;" id="expiredMsg">هذا الكوبون انتهت صلاحيته</div>
+    </div>
+  </div>
+
+  <!-- ALREADY USED -->
+  <div class="state" id="stateUsed">
+    <div class="blocked-card">
+      <span style="font-size:48px;display:block;margin-bottom:14px;">✅</span>
+      <div style="font-size:20px;font-weight:900;color:var(--muted);font-family:'Rubik',sans-serif;margin-bottom:6px;">تم الاستبدال مسبقاً</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.6;" id="usedMsg">هذا الكوبون استُبدل من قبل</div>
+    </div>
+  </div>
+
+  <!-- VALID — MAIN REDEEM VIEW -->
+  <div class="state" id="stateValid">
+
+    <!-- Prize Card -->
+    <div class="prize-card">
+      <div class="prize-top">
+        <span class="prize-emoji" id="prizeEmoji">🎁</span>
+        <div class="prize-name" id="prizeName">جاري التحميل</div>
+        <div class="prize-shop" id="prizeShop"></div>
+      </div>
+      <div class="prize-bottom">
+        <div class="prize-meta">📅 <span id="prizeExpiry">—</span></div>
+        <div class="prize-meta">📍 <span id="prizeBranch">—</span></div>
+        <div class="coupon-id-row" id="couponIdRow"></div>
+      </div>
+    </div>
+
+    <!-- Status -->
+    <div class="status-row">
+      <div class="status-dot dot-valid"></div>
+      <div class="status-txt txt-valid">✓ كوبون صالح — جاهز للاستبدال</div>
+    </div>
+
+    <!-- Phone Verify -->
+    <div class="verify-card">
+      <div class="verify-title">تحقق من رقم العميل</div>
+
+      <!-- Has phone -->
+      <div id="hasPhoneBlock">
+        <div class="reg-phone-display" id="regPhoneDisplay">—</div>
+        <div style="font-size:11px;color:var(--muted);text-align:center;margin-bottom:12px;">
+          الرقم المسجل مع الجايزة — اطلب من العميل يأكده
+        </div>
+        <div class="verify-input-row">
+          <input class="verify-input" id="staffPhone" type="tel" maxlength="11"
+            placeholder="ادخل رقم العميل"
+            oninput="this.value=this.value.replace(/\D/g,''); checkMatch()">
+          <button class="verify-btn" onclick="checkMatch()">✓</button>
+        </div>
+        <div class="match-result match-ok" id="matchOk">✅ الرقم مطابق — يمكن الاستبدال</div>
+        <div class="match-result match-err" id="matchErr">❌ الرقم غير مطابق — تأكد مع العميل</div>
+      </div>
+
+      <!-- No phone registered -->
+      <div id="noPhoneBlock" style="display:none;">
+        <div class="no-phone-note">
+          العميل لم يسجل رقمه<br>يمكن الاستبدال بدون تحقق أو اطلب منه تأكيد شفهي
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+      <button class="btn-redeem" id="redeemBtn" onclick="doRedeem()" disabled>
+        ✅ تم الاستبدال
+      </button>
+      <button class="btn-later" onclick="doLater()">
+        ⏳ تأجيل الاستبدال — الكود لسه صالح
+      </button>
+    </div>
+
+  </div><!-- /stateValid -->
+
+  <!-- DONE: REDEEMED -->
+  <div class="state" id="stateDone">
+    <div class="done-card">
+      <span class="done-icon">🎉</span>
+      <div class="done-title success">تم الاستبدال بنجاح!</div>
+      <div class="done-sub" id="doneSubMsg">الجايزة اتسلمت للعميل</div>
+      <div class="done-coupon" id="doneCouponId"></div>
+    </div>
+  </div>
+
+  <!-- DONE: DEFERRED -->
+  <div class="state" id="stateDeferred">
+    <div class="done-card">
+      <span class="done-icon">⏳</span>
+      <div class="done-title deferred">تم التأجيل</div>
+      <div class="done-sub">الكوبون لسه صالح — العميل يقدر يرجع يستبدله</div>
+      <div class="done-coupon" id="deferredCouponId"></div>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<script>
+const SUPABASE_URL  = 'https://ordbzocfzzrymhilvote.supabase.co'
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yZGJ6b2NmenpyeW1oaWx2b3RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTcyMTAsImV4cCI6MjA5NjYzMzIxMH0.q9uEWe5unC3-wKrQFjOgYvQZmEDfKQEzlxlObEGq0EY'
+
+const { createClient } = window.supabase
+const db = createClient(SUPABASE_URL, SUPABASE_ANON)
+
+// ── GET COUPON FROM URL ───────────────────────────────────────
+const params    = new URLSearchParams(window.location.search)
+const COUPON_ID = params.get('c')   // ?c=2LAK-XXXX-XXXX
+let   SESSION   = null
+let   REG_PHONE = null
+
+// ── STATE MANAGER ─────────────────────────────────────────────
+function showState(id) {
+  document.querySelectorAll('.state').forEach(s => s.classList.remove('active'))
+  document.getElementById(id).classList.add('active')
+}
+
+// ── LOAD COUPON ───────────────────────────────────────────────
+async function loadCoupon() {
+  if (!COUPON_ID) {
+    document.getElementById('errorMsg').textContent = 'مفيش كود في الرابط — تأكد من الـ QR'
+    showState('stateError')
+    return
+  }
+
+  const { data, error } = await db
+    .from('sessions')
+    .select('*, branches(name, providers(name, logo_emoji))')
+    .eq('coupon_code', COUPON_ID)
+    .single()
+
+  if (error || !data) {
+    document.getElementById('errorMsg').textContent = 'الكود: ' + COUPON_ID + ' — غير موجود في النظام'
+    showState('stateError')
+    return
+  }
+
+  SESSION = data
+
+  // Check if already redeemed
+  if (data.redeemed) {
+    const redeemedAt = data.redeemed_at ? new Date(data.redeemed_at).toLocaleDateString('ar-EG') : '—'
+    document.getElementById('usedMsg').textContent = 'تم الاستبدال بتاريخ ' + redeemedAt
+    showState('stateUsed')
+    return
+  }
+
+  // Check if expired
+  if (data.coupon_expires_at && new Date(data.coupon_expires_at) < new Date()) {
+    const expiredAt = new Date(data.coupon_expires_at).toLocaleDateString('ar-EG')
+    document.getElementById('expiredMsg').textContent = 'انتهت الصلاحية في ' + expiredAt
+    showState('stateExpired')
+    return
+  }
+
+  // Valid — populate UI
+  const prize   = data.spin_result || 'جايزة'
+  const shop    = data.branches?.providers?.name || '—'
+  const branch  = data.branches?.name || '—'
+  const expiry  = data.coupon_expires_at
+    ? 'صالح حتى ' + new Date(data.coupon_expires_at).toLocaleDateString('ar-EG')
+    : 'صالح ٧ أيام'
+
+  // Extract emoji from prize name
+  const emojiMatch = prize.match(/\p{Emoji}/u)
+  document.getElementById('prizeEmoji').textContent = emojiMatch ? emojiMatch[0] : '🎁'
+  document.getElementById('prizeName').textContent  = prize.replace(/\p{Emoji}/gu, '').trim() || prize
+  document.getElementById('prizeShop').textContent  = shop
+  document.getElementById('prizeExpiry').textContent = expiry
+  document.getElementById('prizeBranch').textContent = branch
+  document.getElementById('couponIdRow').textContent = COUPON_ID
+
+  // Phone verification
+  REG_PHONE = data.phone || null
+  if (REG_PHONE) {
+    document.getElementById('regPhoneDisplay').textContent = REG_PHONE
+    document.getElementById('hasPhoneBlock').style.display = 'block'
+    document.getElementById('noPhoneBlock').style.display  = 'none'
+  } else {
+    document.getElementById('hasPhoneBlock').style.display = 'none'
+    document.getElementById('noPhoneBlock').style.display  = 'block'
+    // No phone — allow redeem directly
+    document.getElementById('redeemBtn').disabled = false
+  }
+
+  showState('stateValid')
+}
+
+// ── PHONE MATCH ───────────────────────────────────────────────
+function checkMatch() {
+  const entered = document.getElementById('staffPhone').value.replace(/\D/g, '')
+  if (entered.length < 6) return
+
+  if (!REG_PHONE || REG_PHONE === '—') {
+    document.getElementById('redeemBtn').disabled = false
+    return
+  }
+
+  // Compare: stored is masked like 010****56
+  // Match first 3 digits + last 2 digits
+  const storedFirst3 = REG_PHONE.replace(/\D/g, '').slice(0, 3)
+  const storedLast2  = REG_PHONE.slice(-2).replace(/\D/g, '')
+  const entFirst3    = entered.slice(0, 3)
+  const entLast2     = entered.slice(-2)
+
+  const match = entFirst3 === storedFirst3 && entLast2 === storedLast2 && entered.length >= 10
+
+  document.getElementById('matchOk').style.display  = match ? 'block' : 'none'
+  document.getElementById('matchErr').style.display = match ? 'none'  : 'block'
+  document.getElementById('redeemBtn').disabled     = !match
+}
+
+// ── REDEEM ────────────────────────────────────────────────────
+async function doRedeem() {
+  document.getElementById('redeemBtn').disabled = true
+  document.getElementById('redeemBtn').textContent = 'جاري...'
+
+  const { error } = await db
+    .from('sessions')
+    .update({
+      redeemed:     true,
+      redeemed_at:  new Date().toISOString(),
+      redeemed_by:  'staff'
+    })
+    .eq('id', SESSION.id)
+    .eq('redeemed', false)
+
+  if (error) {
+    document.getElementById('redeemBtn').disabled = false
+    document.getElementById('redeemBtn').textContent = '✅ تم الاستبدال'
+    alert('خطأ: ' + error.message)
+    return
+  }
+
+  document.getElementById('doneSubMsg').textContent  = 'الجايزة: ' + (SESSION.spin_result || '—')
+  document.getElementById('doneCouponId').textContent = COUPON_ID
+  showState('stateDone')
+}
+
+// ── DEFER ─────────────────────────────────────────────────────
+async function doLater() {
+  await db.from('sessions')
+    .update({ redeem_cancelled: true })
+    .eq('id', SESSION.id)
+
+  document.getElementById('deferredCouponId').textContent = COUPON_ID
+  showState('stateDeferred')
+}
+
+// ── BOOT ──────────────────────────────────────────────────────
+loadCoupon()
+</script>
+</body>
+</html>
