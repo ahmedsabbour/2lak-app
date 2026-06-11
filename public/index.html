@@ -1004,7 +1004,7 @@ async function loadBranchData() {
 
   } catch (err) {
     console.warn('[2lak] Supabase load failed — using static fallback:', err.message)
-    // Fallback to static prizes already defined below
+    PRIZES = STATIC_PRIZES
     initWheel()
   }
 }
@@ -1088,7 +1088,7 @@ const STATIC_PRIZES = [
   { label: 'خصم ١٥٪',       emoji: '💰', prob: 15, isWin: true  },
   { label: 'قهوة مجانية',   emoji: '☕', prob: 10, isWin: true  },
 ]
-if (!PRIZES.length) PRIZES = STATIC_PRIZES
+// Static prizes used only as fallback inside loadBranchData catch block
 
 const SEG_COLORS = ['#100F00','#000F00','#0F0000','#00000F','#0F0008','#151000','#00100A','#100800']
 const SOURCE_LABELS = { ig:'📸 Instagram', qr:'📱 QR Code', fb:'👍 Facebook', gm:'📍 Google Maps', wa:'💬 WhatsApp' }
