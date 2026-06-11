@@ -536,6 +536,58 @@ html,body{min-height:100%;background:var(--bg);font-family:'Cairo',sans-serif;co
 /* ══════════════════
    TOAST
 ══════════════════ */
+/* ── REFERRAL ── */
+.referral-section{
+  width:100%;background:var(--bg3);
+  border:1px solid rgba(255,217,61,.15);
+  border-radius:var(--r);padding:18px;
+  display:flex;flex-direction:column;gap:12px;
+}
+.ref-header{text-align:center;}
+.ref-icon{font-size:32px;margin-bottom:6px;}
+.ref-title{font-size:15px;font-weight:900;color:var(--white);font-family:'Rubik',sans-serif;margin-bottom:4px;}
+.ref-sub{font-size:12px;color:var(--muted);line-height:1.6;}
+.ref-count-row{display:flex;justify-content:center;}
+.ref-badge-wrap{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(255,217,61,.1);border:1px solid rgba(255,217,61,.25);
+  border-radius:var(--r-pill);padding:6px 14px;
+}
+.ref-badge-icon{font-size:16px;}
+.ref-badge-txt{font-size:13px;font-weight:700;color:var(--gold);}
+.ref-share-btn{
+  width:100%;padding:13px;border-radius:var(--r-sm);
+  background:transparent;border:1.5px solid rgba(255,217,61,.35);
+  color:var(--gold);font-family:'Rubik',sans-serif;
+  font-size:14px;font-weight:900;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:all .2s;
+  text-shadow:0 0 10px rgba(255,217,61,.3);
+}
+.ref-share-btn:hover{background:rgba(255,217,61,.07);box-shadow:0 0 16px rgba(255,217,61,.15);}
+.ref-share-btn:active{transform:scale(.97);}
+.ref-link-box{
+  display:flex;align-items:center;gap:8px;
+  background:var(--bg4);border:1px solid var(--muted2);
+  border-radius:var(--r-sm);padding:8px 12px;
+}
+.ref-link-txt{flex:1;font-size:11px;color:var(--muted);direction:ltr;text-align:left;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.ref-copy-btn{
+  background:var(--muted2);border:none;border-radius:6px;
+  padding:4px 10px;font-family:'Cairo',sans-serif;
+  font-size:11px;font-weight:700;color:var(--off);cursor:pointer;flex-shrink:0;
+}
+.ref-copy-btn:hover{background:var(--bg4);color:var(--white);}
+
+/* ── PHONE PAGE badge in header ── */
+.ref-from-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(57,255,20,.08);border:1px solid rgba(57,255,20,.2);
+  border-radius:var(--r-pill);padding:5px 14px;
+  font-size:11px;font-weight:700;color:var(--neon-g);
+  margin-bottom:10px;
+}
+
 .toast{
   position:fixed;bottom:24px;left:50%;
   transform:translateX(-50%) translateY(80px);
@@ -550,7 +602,7 @@ html,body{min-height:100%;background:var(--bg);font-family:'Cairo',sans-serif;co
 }
 .toast.show{transform:translateX(-50%) translateY(0)}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/db.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 <body>
 
@@ -654,46 +706,31 @@ html,body{min-height:100%;background:var(--bg);font-family:'Cairo',sans-serif;co
     <div class="powered-bar">مدعوم بـ <strong>2lak.app</strong></div>
   </div>
 
-  <!-- PAGE 3: OTP -->
+  <!-- PAGE 3: PHONE REGISTER (replaces OTP) -->
   <div class="page" id="pageOtp">
     <div class="otp-page">
       <div>
         <div class="otp-icon-wrap">
           <svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18" stroke-linecap="round" stroke-width="2.5"/></svg>
         </div>
-        <div class="otp-title">تأكيد رقمك</div>
-        <div class="otp-sub">هنبعتلك كود على موبايلك<br>عشان تاخد جايزتك</div>
+        <div id="refFromBadge" class="ref-from-badge" style="display:none;">
+          🎯 جاي من رشح صاحبك
+        </div>
+        <div class="otp-title">سجّل رقمك</div>
+        <div class="otp-sub">رقمك بيتحفظ مع جايزتك<br>الموظف هيتأكد منه وقت الاستبدال</div>
       </div>
       <div class="otp-form" id="phoneStep">
         <div class="phone-wrap">
           <div class="flag-code">🇪🇬 +20</div>
           <input class="phone-in" id="phoneInput" type="tel" placeholder="010 0000 0000" maxlength="11" oninput="handlePhone(this)">
         </div>
-        <button class="neon-btn cyan" id="sendOtpBtn" onclick="sendOTP()" disabled>إرسال كود التحقق</button>
+        <button class="neon-btn gold" id="sendOtpBtn" onclick="registerPhone()" disabled>
+          احتفظ بجايزتي 🎁
+        </button>
         <div class="priv-note">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-          رقمك محمي — بيُستخدم بس لمنع الاستخدام المتكرر
+          رقمك بيتربط بجايزتك فقط — الموظف هيطلبه منك عند الاستبدال
         </div>
-      </div>
-      <div class="otp-boxes-section" id="otpStep" style="display:none;">
-        <div class="otp-sent-note">وصلك كود على <span id="otpPhone">010****</span></div>
-        <div class="test-banner" id="testBanner">
-          <div><div class="test-badge">TEST MODE</div><div style="font-size:10px;color:var(--neon-g);margin-top:3px;">الكود الثابت</div></div>
-          <div class="test-code">123456</div>
-        </div>
-        <div class="otp-boxes" id="otpBoxes">
-          <div class="obox active" data-i="0"></div>
-          <div class="obox" data-i="1"></div>
-          <div class="obox" data-i="2"></div>
-          <div class="obox" data-i="3"></div>
-          <div class="obox" data-i="4"></div>
-          <div class="obox" data-i="5"></div>
-        </div>
-        <input type="tel" id="otpHidden" maxlength="6" inputmode="numeric"
-          style="position:absolute;opacity:0;width:1px;height:1px;pointer-events:none;"
-          oninput="handleOTP(this)">
-        <button class="neon-btn gold" id="verifyBtn" onclick="verifyOTP()" disabled>تأكيد وجيب جايزتي</button>
-        <div class="resend-txt">لو ماجاش — <span onclick="resendOTP()">إعادة الإرسال</span></div>
       </div>
     </div>
     <div class="powered-bar">مدعوم بـ <strong>2lak.app</strong></div>
@@ -753,6 +790,28 @@ html,body{min-height:100%;background:var(--bg);font-family:'Cairo',sans-serif;co
             </div>
             <span class="rev-text">Instagram</span><span class="rev-arrow">←</span>
           </a>
+        </div>
+      </div>
+      <!-- REFERRAL SHARE -->
+      <div class="referral-section" id="referralSection" style="display:none;">
+        <div class="ref-header">
+          <div class="ref-icon">🎯</div>
+          <div class="ref-title">شارك صاحبك يكسب جايزة</div>
+          <div class="ref-sub">لو صاحبك سجّل من رابطك — هتاخد badge في ملفك</div>
+        </div>
+        <div class="ref-count-row" id="refCountRow" style="display:none;">
+          <span class="ref-badge-wrap">
+            <span class="ref-badge-icon">🏅</span>
+            <span class="ref-badge-txt" id="refBadgeCount">0 رشّح</span>
+          </span>
+        </div>
+        <button class="ref-share-btn" onclick="shareReferral()">
+          <span>شارك الرابط</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16,6 12,2 8,6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+        </button>
+        <div class="ref-link-box" id="refLinkBox" style="display:none;">
+          <span class="ref-link-txt" id="refLinkTxt"></span>
+          <button class="ref-copy-btn" onclick="copyRefLink()">نسخ</button>
         </div>
       </div>
     </div>
@@ -832,13 +891,22 @@ html,body{min-height:100%;background:var(--bg);font-family:'Cairo',sans-serif;co
 <div class="toast" id="toast"></div>
 <script>
 // ── SUPABASE CONFIG ──────────────────────────────────────────
-const SUPABASE_URL  = 'https://ordbzocfzzrymhilvote.db.co'
+const SUPABASE_URL  = 'https://ordbzocfzzrymhilvote.supabase.co'
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yZGJ6b2NmenpyeW1oaWx2b3RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTcyMTAsImV4cCI6MjA5NjYzMzIxMH0.q9uEWe5unC3-wKrQFjOgYvQZmEDfKQEzlxlObEGq0EY'
 
 // Branch ID من الـ URL أو hardcoded للـ demo
 const urlParams = new URLSearchParams(window.location.search)
-const BRANCH_ID = urlParams.get('branch') || null
-const src = urlParams.get('src') || 'qr'
+const BRANCH_ID  = urlParams.get('branch') || null
+const src        = urlParams.get('src') || 'qr'
+const REF_ID     = urlParams.get('ref') || null   // referrer session ID
+
+// Show referral badge on phone page if came from ref link
+if (REF_ID) {
+  document.addEventListener('DOMContentLoaded', () => {
+    const badge = document.getElementById('refFromBadge');
+    if (badge) badge.style.display = 'inline-flex';
+  });
+}
 
 // ── SUPABASE CLIENT (CDN) ─────────────────────────────────────
 let db = null
@@ -947,9 +1015,12 @@ let SHOP_LOGO = '🏪'
 async function createDBSession() {
   try {
     const fp = await getDeviceFingerprint()
+    const sessionData = { branch_id: BRANCH_ID, source: src, device_fp: fp }
+    // Store referral info in complaint_text field (temp MVP solution)
+    if (REF_ID) sessionData.complaint_text = 'ref:' + REF_ID;
     const { data, error } = await db
       .from('sessions')
-      .insert({ branch_id: BRANCH_ID, source: src, device_fp: fp })
+      .insert(sessionData)
       .select('id')
       .single()
     if (!error) SESSION_ID = data.id
@@ -1164,12 +1235,13 @@ function goToRate() {
 // ── RATING ──────────────────────────────────────────────────
 // ── ADMIN CONFIG (will be set from Admin Panel) ──────────────
 const CONFIG = {
-  otp_enabled: false,   // Admin can toggle ON/OFF
+  otp_enabled: true,    // true = phone registration (free), false = skip phone
 };
 
 function goHappy() {
   window._isSad = false
   updateSessionRating('happy')
+  // Always collect phone (free — no SMS) unless disabled in admin
   if (CONFIG.otp_enabled) { showPage('pageOtp') }
   else { showRewardDirect() }
 }
@@ -1182,11 +1254,65 @@ function goSad() {
 function showRewardDirect() {
   document.getElementById('rewardPrizeName').textContent = wonPrize.emoji + ' ' + wonPrize.label;
   showPage('pageReward');
+  // Show referral section after reward page loads
+  setTimeout(() => {
+    const ref = document.getElementById('referralSection');
+    if (ref) ref.style.display = 'flex';
+    loadRefCount();
+  }, 800);
 }
 
-// ── OTP ─────────────────────────────────────────────────────
-let otpCode = '';
-let enteredOtp = '';
+// ── REFERRAL ─────────────────────────────────────────────────
+function buildRefLink() {
+  const base = window.location.origin + window.location.pathname;
+  return base + '?branch=' + BRANCH_ID + '&src=ref&ref=' + (SESSION_ID || 'guest');
+}
+
+async function loadRefCount() {
+  if (!SESSION_ID || !db) return;
+  const { count } = await db.from('sessions')
+    .select('id', { count: 'exact', head: true })
+    .eq('branch_id', BRANCH_ID)
+    .eq('source', 'ref')
+    .ilike('device_fp', '%' + SESSION_ID.slice(0,8) + '%'); // approximate match
+  // Simpler: count via ref param stored in session
+  const { data } = await db.from('sessions')
+    .select('id', { count: 'exact', head: true })
+    .eq('branch_id', BRANCH_ID)
+    .not('phone_hash', 'is', null); // registered via referral
+  const refRow = document.getElementById('refCountRow');
+  // For MVP just show badge row always, real count needs ref column
+  refRow.style.display = 'flex';
+  document.getElementById('refBadgeCount').textContent =
+    (count || 0) + (count === 1 ? ' رشّح' : ' رشّح');
+}
+
+function shareReferral() {
+  const link = buildRefLink();
+  const box  = document.getElementById('refLinkBox');
+  document.getElementById('refLinkTxt').textContent = link;
+  box.style.display = 'flex';
+  // Try native share first
+  if (navigator.share) {
+    navigator.share({
+      title: '🎁 اكسب جايزة من ' + SHOP_NAME,
+      text:  'دوّر العجلة واكسب جايزة من ' + SHOP_NAME + ' — من رابط صاحبك!',
+      url:   link
+    }).catch(() => {});
+  } else {
+    navigator.clipboard?.writeText(link).catch(() => {});
+    showToast('📋 تم نسخ رابط الرشح!');
+  }
+}
+
+function copyRefLink() {
+  const link = document.getElementById('refLinkTxt').textContent;
+  navigator.clipboard?.writeText(link).catch(() => {});
+  showToast('📋 تم النسخ!');
+}
+
+// ── PHONE REGISTER (replaces OTP) ───────────────────────────
+let registeredPhone = null;
 
 function handlePhone(el) {
   const val = el.value.replace(/\D/g, '');
@@ -1194,75 +1320,48 @@ function handlePhone(el) {
   document.getElementById('sendOtpBtn').disabled = val.length < 10;
 }
 
-function sendOTP() {
-  const phone = document.getElementById('phoneInput').value;
+async function registerPhone() {
+  const phone = document.getElementById('phoneInput').value.replace(/\D/g, '');
   if (phone.length < 10) return;
-  // ─ TEST MODE: fixed code ─────────────────────
-  otpCode = '123456';
-  // ─────────────────────────────────────────────
-  enteredOtp = '';
-  const masked = phone.slice(0,3) + '****' + phone.slice(-2);
-  document.getElementById('otpPhone').textContent = masked;
-  document.getElementById('phoneStep').style.display = 'none';
-  const otpStepEl = document.getElementById('otpStep');
-  otpStepEl.style.display = 'flex';
-  document.getElementById('testBanner').style.display = 'flex';
-  setTimeout(() => {
-    document.getElementById('otpHidden').focus();
-  }, 100);
-}
-
-function handleOTP(el) {
-  enteredOtp = el.value.replace(/\D/g, '').slice(0,6);
-  const boxes = document.querySelectorAll('.otp-box');
-  boxes.forEach((b, i) => {
-    b.classList.remove('active','filled');
-    if (i < enteredOtp.length) {
-      b.textContent = enteredOtp[i];
-      b.classList.add('filled');
-    } else {
-      b.textContent = '';
-      if (i === enteredOtp.length) b.classList.add('active');
-    }
-  });
-  document.getElementById('verifyBtn').disabled = enteredOtp.length < 6;
-}
-
-// tap on boxes → focus hidden
-document.getElementById('otpBoxes').addEventListener('click', () => {
-  document.getElementById('otpHidden').focus();
-});
-
-function verifyOTP() {
-  if (enteredOtp === otpCode) {
-    showToast('✅ تم التحقق بنجاح!');
-    setTimeout(() => {
-      if (window._isSad) { showPage('pageSad'); }
-      else { showRewardDirect(); }
-    }, 600);
-  } else {
-    showToast('❌ الكود غلط — جرب تاني');
-    enteredOtp = '';
-    document.getElementById('otpHidden').value = '';
-    document.querySelectorAll('.otp-box').forEach((b,i) => {
-      b.textContent = '';
-      b.classList.remove('filled');
-      if (i === 0) b.classList.add('active');
-      else b.classList.remove('active');
-    });
-    document.getElementById('verifyBtn').disabled = true;
+  registeredPhone = phone;
+  // Hash phone for privacy
+  const enc  = new TextEncoder().encode('+20' + phone);
+  const buf  = await crypto.subtle.digest('SHA-256', enc);
+  const hash = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('').slice(0,32);
+  // Check one-time lock
+  if (db && BRANCH_ID) {
+    const { data: existing } = await db.from('sessions')
+      .select('id, coupon_code')
+      .eq('branch_id', BRANCH_ID)
+      .eq('phone_hash', hash)
+      .not('coupon_code', 'is', null)
+      .limit(1);
+    if (existing?.length) { showPage('pageLocked'); return; }
   }
+  // Save phone + hash to session
+  if (SESSION_ID && db) {
+    await db.from('sessions').update({
+      phone: phone.slice(0,3) + '****' + phone.slice(-2),
+      phone_hash: hash
+    }).eq('id', SESSION_ID);
+  }
+  showToast('✅ تم تسجيل رقمك');
+  setTimeout(() => {
+    if (window._isSad) { showPage('pageSad'); }
+    else { showRewardDirect(); }
+  }, 400);
 }
 
-function resendOTP() {
-  otpCode = '123456';
-  showToast('📱 كود التجربة دايماً: 123456');
-}
+// Keep for CONFIG.otp_enabled compatibility (unused now)
+function sendOTP() { registerPhone(); }
+function verifyOTP() {}
+function resendOTP() {}
+function handleOTP() {}
 
 // ── COMPLAINT ────────────────────────────────────────────────
 function toggleChip(el) { el.classList.toggle('active'); }
 
-function submitComplaint() {
+async function submitComplaint() {
   const chips = [...document.querySelectorAll('.chip.active')].map(c => c.textContent)
   const text  = document.getElementById('complaintText').value
   if (!chips.length && !text.trim()) {
@@ -1284,9 +1383,18 @@ function submitComplaint() {
   const cid = '2LAK-SAD-' + uid + '-' + ts
   document.getElementById('sadCouponId').textContent = 'ID: ' + cid
 
-  const redeemHtml = buildRedeemPage(cid, prizeName, SHOP_NAME)
-  const blob       = new Blob([redeemHtml], { type: 'text/html' })
-  generateQR(sadCanvas, URL.createObjectURL(blob))
+  // Save coupon to DB
+  if (SESSION_ID && db) {
+    const expires = new Date(); expires.setDate(expires.getDate() + 14)
+    await db.from('sessions').update({
+      coupon_code: cid,
+      coupon_issued_at: new Date().toISOString(),
+      coupon_expires_at: expires.toISOString()
+    }).eq('id', SESSION_ID)
+  }
+  // Real redeem URL
+  const sadRedeemURL = window.location.origin + '/redeem.html?c=' + cid
+  generateQR(sadCanvas, sadRedeemURL)
 
   window.scrollTo(0, 0)
   showToast('✅ وصلت للإدارة — جايزتك جاهزة 🎁')
@@ -1348,54 +1456,22 @@ function generateQR(canvas, text) {
 }
 
 // ── REDEEM PAGE (staff view) ──────────────────────────────────
-function buildRedeemPage(couponId, prizeName, shopName) {
-  return `<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>2lak — Redeem</title>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800;900&display=swap" rel="stylesheet">
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:#0C0C0C;color:#F0EDE8;font-family:'Cairo',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
-.card{background:#161616;border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:28px 24px;max-width:360px;width:100%;text-align:center;}
-.status-dot{width:14px;height:14px;border-radius:50%;background:#22C55E;margin:0 auto 16px;box-shadow:0 0 10px #22C55E;}
-.title{font-size:13px;color:#888;margin-bottom:4px;}
-.prize{font-size:22px;font-weight:900;color:#F5C842;margin-bottom:6px;}
-.shop{font-size:13px;color:#888;margin-bottom:20px;}
-.id-box{background:#0C0C0C;border-radius:8px;padding:10px;font-family:monospace;font-size:12px;color:#555;margin-bottom:24px;word-break:break-all;}
-.btn-redeem{width:100%;padding:16px;background:#22C55E;border:none;border-radius:12px;font-family:'Cairo',sans-serif;font-size:16px;font-weight:800;color:#0A1800;cursor:pointer;margin-bottom:10px;}
-.btn-cancel{width:100%;padding:14px;background:transparent;border:1px solid rgba(239,68,68,0.4);border-radius:12px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:600;color:#EF4444;cursor:pointer;}
-.btn-redeem:active,.btn-cancel:active{transform:scale(0.98);}
-.done-msg{display:none;font-size:18px;font-weight:800;color:#22C55E;padding:20px 0;}
-</style>
-</head>
-<body>
-<div class="card">
-  <div class="status-dot" id="dot"></div>
-  <div class="title">جايزة صالحة للاستبدال</div>
-  <div class="prize" id="prizeEl">${prizeName}</div>
-  <div class="shop">${shopName}</div>
-  <div class="id-box">${couponId}</div>
-  <div id="actions">
-    <button class="btn-redeem" onclick="redeem()">✅ تم الاستبدال</button>
-    <button class="btn-cancel" onclick="cancelRedeem()">❌ رفض الاستبدال الآن</button>
-  </div>
-  <div class="done-msg" id="doneMsg"></div>
-</div>
-<script>
+// buildRedeemPage removed — using standalone redeem.html
 function redeem(){
   document.getElementById('actions').style.display='none';
   const d=document.getElementById('doneMsg');
-  d.style.display='block'; d.textContent='✅ تم الاستبدال بنجاح';
-  document.getElementById('dot').style.background='#F5C842';
-  document.getElementById('dot').style.boxShadow='0 0 10px #F5C842';
-  // In prod: POST /api/redeem { couponId }
+  d.style.display='block';
+  document.getElementById('doneIcon').textContent='🎉';
+  document.getElementById('doneTxt').textContent='تم الاستبدال بنجاح';
+  document.getElementById('doneTxt').style.color='#39FF14';
 }
 function cancelRedeem(){
   document.getElementById('actions').style.display='none';
   const d=document.getElementById('doneMsg');
-  d.style.display='block'; d.textContent='⏳ تم التأجيل — الكود لسه صالح';
-  document.getElementById('dot').style.background='#888';
+  d.style.display='block';
+  document.getElementById('doneIcon').textContent='⏳';
+  document.getElementById('doneTxt').textContent='تم التأجيل — الكود لسه صالح';
+  document.getElementById('doneTxt').style.color='#FFD93D';
 }
 <\/script>
 </body></html>`;
@@ -1426,7 +1502,7 @@ function trackReviewClick(platform) {
   // In production: fetch('/api/track', { method:'POST', body: JSON.stringify({ platform, uid: sessionUid }) })
 }
 
-function revealQR() {
+async function revealQR() {
   dbRevealQR()
   const locked  = document.getElementById('qrLockedWrap')
   const revealW = document.getElementById('qrRevealWrap')
@@ -1434,14 +1510,22 @@ function revealQR() {
   const idEl    = document.getElementById('couponId')
   locked.style.display  = 'none'
   revealW.style.display = 'flex'
-  const uid  = Math.random().toString(36).slice(2,10).toUpperCase()
-  const ts   = Date.now().toString(36).toUpperCase()
-  const cid  = '2LAK-' + uid + '-' + ts
-  if (idEl) { idEl.textContent = 'ID: ' + cid; idEl.style.display='flex' }
-  const prize = document.getElementById('rewardPrizeName')?.textContent || 'جايزة'
-  const redeemHtml  = buildRedeemPage(cid, prize, SHOP_NAME)
-  const blob   = new Blob([redeemHtml], { type: 'text/html' })
-  const redeemURL = URL.createObjectURL(blob)
+  // Generate coupon code
+  const uid = Math.random().toString(36).slice(2,8).toUpperCase()
+  const ts  = Date.now().toString(36).toUpperCase()
+  const cid = '2LAK-' + uid + '-' + ts
+  if (idEl) { idEl.textContent = cid; idEl.style.display = 'flex' }
+  // Save coupon to DB
+  if (SESSION_ID && db) {
+    const expires = new Date(); expires.setDate(expires.getDate() + (wonPrize?.validDays || 7))
+    await db.from('sessions').update({
+      coupon_code: cid,
+      coupon_issued_at: new Date().toISOString(),
+      coupon_expires_at: expires.toISOString()
+    }).eq('id', SESSION_ID)
+  }
+  // Build real redeem URL pointing to redeem.html
+  const redeemURL = window.location.origin + '/redeem.html?c=' + cid
   generateQR(canvas, redeemURL)
   showToast('🎉 الـ QR ظهر — اطلب من الموظف يعمل Scan!')
 }
